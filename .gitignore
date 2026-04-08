@@ -1,0 +1,105 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+*.log
+
+# env files (contains secrets)
+.env*
+!.env.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# AI tools
+.claude
+.z-ai-config
+/skills/
+
+# database files (local SQLite testing)
+/db/
+
+# dev scripts
+dev.sh
+Caddyfile
+
+# unused components / old code
+/src/app/api/guests/
+/src/app/api/route.ts
+/src/arduino/
+/examples/
+/mini-services/parking-serial/
+/mini-services/parking-ws/
+
+# unused UI components
+/src/components/ui/accordion.tsx
+/src/components/ui/alert-dialog.tsx
+/src/components/ui/alert.tsx
+/src/components/ui/aspect-ratio.tsx
+/src/components/ui/avatar.tsx
+/src/components/ui/breadcrumb.tsx
+/src/components/ui/carousel.tsx
+/src/components/ui/chart.tsx
+/src/components/ui/checkbox.tsx
+/src/components/ui/collapsible.tsx
+/src/components/ui/command.tsx
+/src/components/ui/context-menu.tsx
+/src/components/ui/drawer.tsx
+/src/components/ui/dropdown-menu.tsx
+/src/components/ui/form.tsx
+/src/components/ui/hover-card.tsx
+/src/components/ui/input-otp.tsx
+/src/components/ui/menubar.tsx
+/src/components/ui/navigation-menu.tsx
+/src/components/ui/pagination.tsx
+/src/components/ui/radio-group.tsx
+/src/components/ui/resizable.tsx
+/src/components/ui/scroll-area.tsx
+/src/components/ui/select.tsx
+/src/components/ui/separator.tsx
+/src/components/ui/sheet.tsx
+/src/components/ui/sidebar.tsx
+/src/components/ui/slider.tsx
+/src/components/ui/textarea.tsx
+/src/components/ui/toast.tsx
+/src/components/ui/toaster.tsx
+/src/components/ui/toggle-group.tsx
+/src/components/ui/toggle.tsx
+/src/components/ui/tooltip.tsx
+
+# unused hooks
+/src/hooks/use-mobile.ts
+/src/hooks/use-toast.ts
+
+# old docs
+/download/HUONG_DAN_SETUP.md
+/download/README.md
+/worklog.md
+
+# screenshots / images not needed
+/public/logo.svg

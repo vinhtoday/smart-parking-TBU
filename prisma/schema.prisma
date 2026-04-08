@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(100)
+  rfidUid     String   @unique @db.VarChar(50)
+  class       String   @default("") @db.VarChar(50)
+  phone       String   @default("") @db.VarChar(20)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Teacher {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(100)
+  rfidUid     String   @unique @db.VarChar(50)
+  department  String   @default("") @db.VarChar(100)
+  phone       String   @default("") @db.VarChar(20)
+  isVip       Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ParkedVehicle {
+  id           String   @id @default(cuid())
+  rfidUid      String   @unique @db.VarChar(50)
+  personName   String   @db.VarChar(100)
+  personType   String   @default("guest") @db.VarChar(20)
+  isVip        Boolean  @default(false)
+  entryTime    DateTime @default(now())
+}
+
+model ParkingHistory {
+  id           String    @id @default(cuid())
+  rfidUid      String    @db.VarChar(50)
+  personName   String    @db.VarChar(100)
+  personType   String    @default("guest") @db.VarChar(20)
+  isVip        Boolean   @default(false)
+  entryTime    DateTime
+  exitTime     DateTime?
+  duration     Int       @default(0)
+  fee          Int       @default(2000)
+  createdAt    DateTime  @default(now())
+}
+
+model ParkingConfig {
+  id          String  @id @default("default")
+  maxSlots    Int     @default(4)
+  feePerTrip  Int     @default(2000)
+  systemName  String  @default("BAI DO XE THONG MINH") @db.VarChar(100)
+  isOpen      Boolean @default(true)
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique @db.VarChar(50)
+  password  String   @db.VarChar(255)
+  name      String   @db.VarChar(100)
+  admin     Int      @default(0) // 0 = tài khoản thường, 1 = admin toàn quyền
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DailyStats {
+  id            String   @id @default(cuid())
+  date          String   @unique @db.VarChar(10)
+  totalEntries  Int      @default(0)
+  totalExits    Int      @default(0)
+  totalRevenue  Int      @default(0)
+  studentCount  Int      @default(0)
+  teacherCount  Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  action    String   @db.VarChar(50)
+  details   String   @default("") @db.VarChar(500)
+  username  String   @default("") @db.VarChar(50)
+  createdAt DateTime @default(now())
+}
