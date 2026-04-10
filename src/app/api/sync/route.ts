@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { todayStr } from '@/lib/format'
+import { verifyArduinoSecret } from '@/lib/api-auth'
 
 interface SyncVehicle {
   uid: string
@@ -10,9 +11,14 @@ interface SyncVehicle {
   entryTime: string
 }
 
-// POST - Full sync from Arduino
+// POST - Full sync from Arduino (requires Arduino shared secret)
 export async function POST(request: NextRequest) {
   try {
+    // Verify Arduino API secret — only Arduino Serial Bridge can sync
+    if (!verifyArduinoSecret(request)) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
     const { parkedVehicles, parkedCount, studentCount, teacherCount } = body
 

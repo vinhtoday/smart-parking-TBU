@@ -24,7 +24,7 @@ export async function POST() {
         update: {},
         create: {
           id: 'default',
-          maxSlots: 4,
+          maxSlots: 6,
           feePerTrip: 2000,
           systemName: 'BAI DO XE THONG MINH',
           isOpen: true,

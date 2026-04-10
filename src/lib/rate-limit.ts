@@ -3,6 +3,17 @@ interface RateLimitEntry {
   resetTime: number
 }
 
+/**
+ * In-memory rate limiter using a Map.
+ *
+ * ⚠️ LIMITATION: Rate limit data is lost on server restart.
+ * For production with multiple instances or persistence, consider using:
+ *   - Redis (ioredis) for distributed rate limiting
+ *   - Upstash Redis for serverless deployments
+ *   - Database-backed rate limiting
+ *
+ * Current implementation is suitable for single-instance deployments.
+ */
 const store = new Map<string, RateLimitEntry>()
 
 // Cleanup stale entries every 5 minutes

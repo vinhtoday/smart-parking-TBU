@@ -11,7 +11,7 @@ export async function GET() {
       config = await db.parkingConfig.create({
         data: {
           id: 'default',
-          maxSlots: 4,
+          maxSlots: 6,
           feePerTrip: 2000,
           systemName: 'BAI DO XE THONG MINH',
           isOpen: true,
@@ -40,6 +40,16 @@ export async function PUT(request: NextRequest) {
     const body = await request.json()
     const { feePerTrip } = body
 
+    // Validate feePerTrip
+    if (feePerTrip !== undefined) {
+      if (typeof feePerTrip !== 'number' || !Number.isInteger(feePerTrip) || feePerTrip < 0 || feePerTrip > 1_000_000) {
+        return NextResponse.json(
+          { success: false, error: 'Phí mỗi lượt phải là số nguyên từ 0 đến 1.000.000' },
+          { status: 400 }
+        )
+      }
+    }
+
     // Ensure config exists or create, then update
     const config = await db.parkingConfig.upsert({
       where: { id: 'default' },
@@ -48,7 +58,7 @@ export async function PUT(request: NextRequest) {
       },
       create: {
         id: 'default',
-        maxSlots: 4,
+        maxSlots: 6,
         feePerTrip: feePerTrip ?? 2000,
         systemName: 'BAI DO XE THONG MINH',
         isOpen: true,

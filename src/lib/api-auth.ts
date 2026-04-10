@@ -1,6 +1,18 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
+
+/**
+ * Verify Arduino API secret from request header.
+ * Arduino Serial Bridge sends "X-Arduino-Secret" header on every request.
+ * Returns true if valid or if ARDUINO_API_SECRET is not set (dev mode).
+ */
+export function verifyArduinoSecret(request: NextRequest): boolean {
+  const secret = process.env.ARDUINO_API_SECRET
+  if (!secret) return true // No secret configured — allow (dev mode)
+  const headerSecret = request.headers.get('x-arduino-secret')
+  return headerSecret === secret
+}
 
 /**
  * Get the current session from the request.

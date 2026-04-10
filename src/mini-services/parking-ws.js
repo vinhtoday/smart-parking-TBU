@@ -25,6 +25,7 @@ const { Server } = require('socket.io')
 try { require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env'), override: true }) } catch {}
 
 const PORT = process.env.WS_PORT || 3003
+const BRIDGE_SECRET = process.env.ARDUINO_WS_SECRET || ''
 
 const io = new Server(PORT, {
   // 🔒 Restrict CORS to localhost only
@@ -71,12 +72,19 @@ function broadcastToBridges(event, data) {
 
 io.on('connection', (socket) => {
   const type = socket.handshake.auth?.type || socket.handshake.query?.type || 'client'
+  const secret = socket.handshake.auth?.secret || ''
   console.log(`[WS] + Connected: ${socket.id} (${type})`)
 
-  // Phân loại: bridge vào room "bridges", client vào room "clients"
+  // 🔒 Verify bridge secret — prevent unauthorized bridge impersonation
   if (type === 'bridge') {
+    if (BRIDGE_SECRET && secret !== BRIDGE_SECRET) {
+      console.log(`[WS]   ✗ Bridge rejected — invalid secret from ${socket.id}`)
+      socket.emit('error', { message: 'Invalid bridge secret' })
+      socket.disconnect(true)
+      return
+    }
     socket.join('bridges')
-    console.log(`[WS]   ↳ Bridge joined room "bridges"`)
+    console.log(`[WS]   ↳ Bridge joined room "bridges"${BRIDGE_SECRET ? ' (authenticated)' : ''}`)
   } else {
     socket.join('clients')
     console.log(`[WS]   ↳ Client joined room "clients"`)

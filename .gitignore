@@ -103,3 +103,14 @@ Caddyfile
 
 # screenshots / images not needed
 /public/logo.svg
+
+# system files
+.accesslog
+.stats
+.config
+
+# dev upload folder (screenshots)
+/upload/
+
+# unused components
+/src/components/PersonBadge.tsx

@@ -4,6 +4,11 @@ import bcrypt from 'bcryptjs'
 import { db } from '@/lib/db'
 import { rateLimit } from '@/lib/rate-limit'
 
+/**
+ * Verify math CAPTCHA.
+ * Supports: a + b, a - b (no negative results), a × b
+ * Numbers range from 2-50 to prevent trivial brute-force.
+ */
 function verifyCaptcha(expression: string, answer: string): boolean {
   const parts = expression.trim().split(' ')
   if (parts.length !== 3) return false
@@ -15,10 +20,16 @@ function verifyCaptcha(expression: string, answer: string): boolean {
   let expected: number
   switch (op) {
     case '+': expected = a + b; break
-    case '-': expected = a - b; break
+    case '-':
+      if (a < b) return false // Prevent negative results
+      expected = a - b
+      break
     case '×': expected = a * b; break
     default: return false
   }
+
+  // Reject trivially simple expressions (single digit)
+  if (a < 2 || b < 2) return false
 
   return parseInt(answer) === expected
 }

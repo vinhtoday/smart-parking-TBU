@@ -17,18 +17,18 @@ function generateCaptcha(): { question: string; answer: number } {
 
   switch (op) {
     case '+':
-      a = Math.floor(Math.random() * 20) + 1
-      b = Math.floor(Math.random() * 20) + 1
+      a = Math.floor(Math.random() * 40) + 10  // 10-49
+      b = Math.floor(Math.random() * 40) + 10  // 10-49
       answer = a + b
       break
     case '-':
-      a = Math.floor(Math.random() * 20) + 5
-      b = Math.floor(Math.random() * a) + 1
+      a = Math.floor(Math.random() * 40) + 15  // 15-54
+      b = Math.floor(Math.random() * (a - 2)) + 2  // 2 to a-2, ensures a >= b+2
       answer = a - b
       break
     case '×':
-      a = Math.floor(Math.random() * 9) + 1
-      b = Math.floor(Math.random() * 9) + 1
+      a = Math.floor(Math.random() * 9) + 2    // 2-10
+      b = Math.floor(Math.random() * 9) + 2    // 2-10
       answer = a * b
       break
   }

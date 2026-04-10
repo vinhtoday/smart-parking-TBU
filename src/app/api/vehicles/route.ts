@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { todayStr } from '@/lib/format'
+import { verifyArduinoSecret, requireAuth } from '@/lib/api-auth'
 
 // GET - Get all currently parked vehicles
 export async function GET() {
@@ -18,9 +19,17 @@ export async function GET() {
   }
 }
 
-// POST - Add a vehicle entry (manual or RFID) — unprotected for Arduino
+// POST - Add a vehicle entry (manual or RFID)
+// Auth: Arduino shared secret OR authenticated user session
 export async function POST(request: NextRequest) {
   try {
+    // Allow if Arduino secret matches, OR user has valid session
+    const isArduino = verifyArduinoSecret(request)
+    const auth = isArduino ? null : await requireAuth(request)
+    if (!isArduino && !auth) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
     let { rfidUid, personName, personType, isVip } = body
 
@@ -144,10 +153,17 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE - Remove a vehicle (exit) — unprotected for Arduino bridge
-// Arduino Serial Bridge calls this without auth, so we allow unauthenticated requests.
+// DELETE - Remove a vehicle (exit)
+// Auth: Arduino shared secret OR authenticated user session
 export async function DELETE(request: NextRequest) {
   try {
+    // Allow if Arduino secret matches, OR user has valid session
+    const isArduino = verifyArduinoSecret(request)
+    const auth = isArduino ? null : await requireAuth(request)
+    if (!isArduino && !auth) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
     let { rfidUid } = body
 

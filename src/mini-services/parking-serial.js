@@ -28,6 +28,8 @@ try { require('dotenv').config({ path: path.resolve(__dirname, '../../.env') }) 
 const PORT = process.env.SERIAL_PORT || 3004
 const WS_PORT = process.env.WS_PORT || 3003
 let SERIAL_PORT_NAME = process.env.ARDUINO_SERIAL_PORT || ''
+const ARDUINO_API_SECRET = process.env.ARDUINO_API_SECRET || ''
+const ARDUINO_WS_SECRET = process.env.ARDUINO_WS_SECRET || ''
 const BAUD_RATE = parseInt(process.env.ARDUINO_BAUD_RATE || '9600')
 const RETRY_INTERVAL = 5000 // Thử kết nối lại mỗi 5 giây
 
@@ -51,7 +53,7 @@ function connectWebSocket() {
       reconnectionAttempts: Infinity,
       reconnectionDelay: 3000,
       timeout: 5000,
-      auth: { type: 'bridge' },
+      auth: { type: 'bridge', secret: ARDUINO_WS_SECRET },
     })
     wsSocket.on('connect', () => {
       console.log(`[Serial] ✅ WebSocket connected (port ${WS_PORT})`)
@@ -113,7 +115,9 @@ async function handleArduinoEvent(type, data) {
 
     // Phản hồi Arduino NGAY — kiểm tra xe đang đỗ để quyết định ENTRY/EXIT
     try {
-      const vehiclesRes = await fetch('http://localhost:3000/api/vehicles')
+      const headers = { 'Content-Type': 'application/json' }
+      if (ARDUINO_API_SECRET) headers['X-Arduino-Secret'] = ARDUINO_API_SECRET
+      const vehiclesRes = await fetch('http://localhost:3000/api/vehicles', { headers })
       const vehiclesJson = await vehiclesRes.json()
       const isParked = vehiclesJson.success &&
         Array.isArray(vehiclesJson.data) &&
@@ -149,9 +153,11 @@ async function handleArduinoEvent(type, data) {
     }
 
     try {
+      const headers = { 'Content-Type': 'application/json' }
+      if (ARDUINO_API_SECRET) headers['X-Arduino-Secret'] = ARDUINO_API_SECRET
       const res = await fetch('http://localhost:3000/api/vehicles', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(scanData),
       })
       const json = await res.json()
@@ -181,9 +187,11 @@ async function handleArduinoEvent(type, data) {
 
   if (type === 'VEHICLE_EXIT') {
     try {
+      const headers = { 'Content-Type': 'application/json' }
+      if (ARDUINO_API_SECRET) headers['X-Arduino-Secret'] = ARDUINO_API_SECRET
       const res = await fetch('http://localhost:3000/api/vehicles', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ rfidUid: rawUid }),
       })
       const json = await res.json()
@@ -225,9 +233,11 @@ async function handleArduinoEvent(type, data) {
     }
 
     try {
+      const headers = { 'Content-Type': 'application/json' }
+      if (ARDUINO_API_SECRET) headers['X-Arduino-Secret'] = ARDUINO_API_SECRET
       const res = await fetch('http://localhost:3000/api/sync', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(syncData),
       })
       const json = await res.json()
@@ -455,7 +465,7 @@ const server = http.createServer((req, res) => {
   // 🔒 Restrict CORS to localhost only
   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Arduino-Secret')
 
   if (req.method === 'OPTIONS') {
     res.writeHead(200)
@@ -628,7 +638,8 @@ const server = http.createServer((req, res) => {
     return
   }
 
-  // POST /command - Gửi lệnh tuỳ ý tới Arduino
+  // POST /command - Gửi lệnh tới Arduino (whitelist only)
+  const ALLOWED_COMMANDS = ['SYNC', 'STATUS', 'OPEN', 'CLOSE', 'BUZZER', 'RESET']
   if (req.method === 'POST' && pathname === '/command') {
     let body = ''
     req.on('data', chunk => { body += chunk })
@@ -639,6 +650,16 @@ const server = http.createServer((req, res) => {
         if (!cmd) {
           res.writeHead(400, { 'Content-Type': 'application/json' })
           res.end(JSON.stringify({ success: false, error: 'Thiếu "command"' }))
+          return
+        }
+        // 🔒 Whitelist check — only allow known safe commands
+        // For WEB_RESPONSE (JSON from API), allow through since it's structured data
+        const isJsonResponse = cmd.startsWith('{') && cmd.includes('"type"')
+        const cmdBase = typeof cmd === 'string' ? cmd.trim().toUpperCase() : ''
+        if (!isJsonResponse && !ALLOWED_COMMANDS.includes(cmdBase)) {
+          console.log(`[Serial] ⚠️ Blocked unknown command: ${cmd.substring(0, 50)}`)
+          res.writeHead(403, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ success: false, error: `Command not allowed. Allowed: ${ALLOWED_COMMANDS.join(', ')}` }))
           return
         }
         const sent = sendToArduino(cmd)
