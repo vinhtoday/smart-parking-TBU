@@ -1,0 +1,19 @@
+[parking-serial] Installing dependencies...
+bun install v1.3.10 (30e609e0)
+No packages! Deleted empty lockfile
+
+[2.00ms] done
+[parking-serial] Running bun run dev...
+$ bun --hot index.ts
+Parking Serial Bridge running on port 3004
+Mode: Simulator (test environment)
+Main API: http://localhost:3000
+WebSocket: http://localhost:3003
+
+Available endpoints:
+  GET  /status   - Trạng thái serial bridge
+  POST /scan     - Quét RFID
+  POST /entry    - Giả lập xe vào bãi
+  POST /exit     - Giả lập xe ra bãi
+  POST /command  - Gửi lệnh (FULL_SYNC, STATUS, BARRIER_OPEN, PING)
+  GET  /log      - Xem log lệnh

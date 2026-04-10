@@ -1,0 +1,15 @@
+[parking-ws] Installing dependencies...
+bun install v1.3.10 (30e609e0)
+
++ socket.io@4.8.3
+
+22 packages installed [84.00ms]
+[parking-ws] Running bun run dev...
+$ bun --hot index.ts
+Parking WebSocket server running on port 3003
+Client connected: MQBRNNX9UB-ac2HBAAAB
+Client connected: 7OVWfekjRxEuMS9PAAAD
+Client disconnected: MQBRNNX9UB-ac2HBAAAB
+Client disconnected: 7OVWfekjRxEuMS9PAAAD
+Client connected: Pks-s3XS8e83fatlAAAF
+Client disconnected: Pks-s3XS8e83fatlAAAF
