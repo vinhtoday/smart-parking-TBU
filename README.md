@@ -53,17 +53,18 @@ RFID quét thẻ → Arduino gửi UID qua Serial → Mini-service xử lý
 ┌──────────────────────────┐  ┌──────────────────────────┐
 │  NEXT.JS APP (port 3000) │  │  PARKING-WS (port 3003)   │
 │  - App Router + Turbopack│  │  - Socket.IO server       │
-│  - 14 API routes         │  │  - Xử lý RFID entry/exit  │
+│  - 15 API routes         │  │  - Xử lý RFID entry/exit  │
 │  - NextAuth JWT          │  │  - Fire/Gas alarm relay   │
-│  - Prisma ORM            │  │  - Serial bridge (3004)   │
+│  - Prisma ORM            │  │  - Relay bridge ↔ client  │
 └──────────┬───────────────┘  └──────────┬───────────────┘
            │                             │
            ▼                             ▼
 ┌──────────────────────────┐  ┌──────────────────────────┐
-│  MySQL (port 3306)       │  │  PARKING-SERIAL (port 3004)│
-│  parking_db              │  │  - serialport ↔ Arduino   │
-│  - 8 tables              │  │  - Baud: 9600             │
-└──────────────────────────┘  └──────────┬───────────────┘
+│  MySQL (port 3306)       │  ┌──────────────────────────┐
+│  parking_db              │  │  PARKING-SERIAL (port 3004)│
+│  - 8 tables              │  │  - serialport ↔ Arduino   │
+└──────────────────────────┘  │  - Baud: 9600             │
+                              └──────────┬───────────────┘
                                           │ USB Serial
                                           ▼
                               ┌──────────────────────────┐
@@ -110,6 +111,7 @@ my-project/
 │                                  #   ParkingHistory, ParkingConfig, DailyStats, User, ActivityLog
 ├── public/
 │   ├── favicon.ico
+│   ├── robots.txt                  # SEO robots config
 │   └── tbu-logo.jpg               # Logo trường TBU
 ├── src/
 │   ├── app/
@@ -189,7 +191,7 @@ my-project/
 # 1. Clone và cài dependencies
 git clone <repo>
 cd my-project
-npm install
+bun install
 
 # 2. Cấu hình .env
 cat > .env << 'EOF'
@@ -225,7 +227,7 @@ Mở trình duyệt: **http://localhost:3000**
 | Username | Password | Quyền (admin) | Mô tả |
 |----------|----------|---------------|--------|
 | `admin` | `admin123` | 1 (Toàn quyền) | Xem tất cả 7 tab, chỉnh cấu hình |
-| `nhanvien` | *(đặt khi seed)* | 0 (Giới hạn) | Chỉ xem Tổng quan, Lịch sử, Báo cáo |
+| `nhanvien` | `nv123456` | 0 (Giới hạn) | Chỉ xem Tổng quan, Lịch sử, Báo cáo |
 
 ### Phân quyền theo tab
 
