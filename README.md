@@ -53,7 +53,7 @@ RFID quét thẻ → Arduino gửi UID qua Serial → Mini-service xử lý
 ┌──────────────────────────┐  ┌──────────────────────────┐
 │  NEXT.JS APP (port 3000) │  │  PARKING-WS (port 3003)   │
 │  - App Router + Turbopack│  │  - Socket.IO server       │
-│  - 11 API routes         │  │  - Xử lý RFID entry/exit  │
+│  - 14 API routes         │  │  - Xử lý RFID entry/exit  │
 │  - NextAuth JWT          │  │  - Fire/Gas alarm relay   │
 │  - Prisma ORM            │  │  - Serial bridge (3004)   │
 └──────────┬───────────────┘  └──────────┬───────────────┘
@@ -62,7 +62,7 @@ RFID quét thẻ → Arduino gửi UID qua Serial → Mini-service xử lý
 ┌──────────────────────────┐  ┌──────────────────────────┐
 │  MySQL (port 3306)       │  │  PARKING-SERIAL (port 3004)│
 │  parking_db              │  │  - serialport ↔ Arduino   │
-│  - 7 tables              │  │  - Baud: 9600             │
+│  - 8 tables              │  │  - Baud: 9600             │
 └──────────────────────────┘  └──────────┬───────────────┘
                                           │ USB Serial
                                           ▼
@@ -83,18 +83,18 @@ RFID quét thẻ → Arduino gửi UID qua Serial → Mini-service xử lý
 
 | Category | Technology | Version |
 |----------|-----------|---------|
-| **Framework** | Next.js (App Router + Turbopack) | 16.1.3 |
+| **Framework** | Next.js (App Router + Turbopack) | 16.1.1 |
 | **Language** | TypeScript | 5.x |
 | **Runtime** | Bun | latest |
-| **Database** | MySQL (Prisma ORM) | 6.11.1 |
+| **Database** | MySQL (Prisma ORM) | 6.19.2 |
 | **UI Library** | shadcn/ui + Radix UI | latest |
-| **Styling** | Tailwind CSS 4 | 4.x |
+| **Excel Export** | ExcelJS | 4.4.0 |
 | **Charts** | Recharts | 3.8.1 |
 | **Realtime** | Socket.IO (client + server) | 4.8.3 |
 | **Auth** | NextAuth.js v4 (JWT + Credentials) | 4.24.11 |
-| **Forms** | React Hook Form + Zod | 7.60 / 4.0.2 |
+| **Styling** | Tailwind CSS 4 (devDep) | 4.x |
 | **Hardware** | serialport | 13.x |
-| **Password** | bcryptjs | latest |
+| **Password** | bcryptjs | 3.0.3 |
 | **Notifications** | Sonner (toast) | 2.0.6 |
 | **Icons** | Lucide React | 0.525.0 |
 | **Fonts** | Geist Sans + Geist Mono | Google Fonts |
@@ -106,50 +106,54 @@ RFID quét thẻ → Arduino gửi UID qua Serial → Mini-service xử lý
 ```
 my-project/
 ├── prisma/
-│   └── schema.prisma              # 7 models: Student, Teacher, ParkedVehicle,
-│                                  #   ParkingHistory, ParkingConfig, DailyStats, User
+│   └── schema.prisma              # 8 models: Student, Teacher, ParkedVehicle,
+│                                  #   ParkingHistory, ParkingConfig, DailyStats, User, ActivityLog
 ├── public/
 │   ├── favicon.ico
 │   └── tbu-logo.jpg               # Logo trường TBU
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx             # Root layout + SessionProvider
-│   │   ├── page.tsx               # Main dashboard
+│   │   ├── page.tsx               # Main dashboard (7 tabs)
 │   │   ├── login/page.tsx         # Trang đăng nhập + CAPTCHA
 │   │   ├── theme-provider.tsx     # Dark/Light theme config
 │   │   └── api/
 │   │       ├── auth/[...nextauth]/route.ts  # NextAuth API
+│   │       ├── activity-logs/route.ts # GET/POST activity logs (admin)
 │   │       ├── config/route.ts    # GET/PUT cấu hình
 │   │       ├── history/route.ts   # GET lịch sử + phân trang + lọc ngày
 │   │       ├── report/route.ts    # GET báo cáo + doanh thu ngày
-│   │       ├── seed/route.ts      # POST seed dữ liệu mặc định + users
+│   │       ├── seed/route.ts      # POST seed dữ liệu (dev only, blocked in prod)
 │   │       ├── stats/route.ts     # GET thống kê realtime
 │   │       ├── students/route.ts  # CRUD sinh viên
 │   │       ├── sync/route.ts      # POST đồng bộ dữ liệu từ Arduino
 │   │       ├── teachers/route.ts  # CRUD giảng viên
+│   │       ├── users/route.ts     # CRUD tài khoản (admin)
 │   │       ├── vehicles/route.ts  # GET/POST/DELETE xe đang đỗ
 │   │       └── vip/route.ts       # POST toggle VIP
 │   ├── components/
 │   │   ├── NextAuthProvider.tsx   # Client SessionProvider wrapper
+│   │   ├── PersonTypeBadge.tsx    # Badge loại người (SV/GV/Khách)
 │   │   ├── tabs/
 │   │   │   ├── OverviewTab.tsx    # Tổng quan + bảng xe đang đỗ
 │   │   │   ├── StudentsTab.tsx    # Quản lý sinh viên (CRUD)
 │   │   │   ├── TeachersTab.tsx    # Quản lý giảng viên (CRUD + VIP)
+│   │   │   ├── ManageTab.tsx      # Quản lý tài khoản (admin)
 │   │   │   ├── HistoryTab.tsx     # Lịch sử + phân trang + lọc ngày + PDF
-│   │   │   ├── ReportsTab.tsx     # Báo cáo + biểu đồ doanh thu + PDF
+│   │   │   ├── ReportsTab.tsx     # Báo cáo + biểu đồ doanh thu + Excel + PDF
 │   │   │   └── SettingsTab.tsx    # Cấu hình + kết nối Arduino
-│   │   └── ui/                    # 14 shadcn/ui components
-│   │       ├── badge.tsx, button.tsx, calendar.tsx, card.tsx
-│   │       ├── dialog.tsx, input.tsx, label.tsx, popover.tsx
-│   │       ├── progress.tsx, skeleton.tsx, sonner.tsx
-│   │       ├── switch.tsx, table.tsx, tabs.tsx
+│   │   └── ui/                    # shadcn/ui components
 │   ├── hooks/
 │   │   ├── useParkingData.ts      # Data fetching hook
-│   │   └── useAlarmSound.ts       # Alarm sound hook
+│   │   ├── useAlarmSound.ts       # Alarm sound hook (Web Audio API)
+│   │   ├── useSocketIO.ts         # Socket.IO client hook
+│   │   └── useArduinoConnection.ts # Arduino connection status hook
 │   ├── lib/
 │   │   ├── auth.ts                # NextAuth config + CAPTCHA verify
 │   │   ├── db.ts                  # Prisma singleton connection
-│   │   ├── format.ts              # Format VND, datetime, duration, XLSX, PDF
+│   │   ├── format.ts              # Format VND, datetime, duration, Excel, PDF
+│   │   ├── api-auth.ts            # requireAuth() + requireAdmin() helpers
+│   │   ├── rate-limit.ts          # In-memory rate limiter
 │   │   └── utils.ts               # cn() helper cho Tailwind
 │   ├── mini-services/
 │   │   ├── parking-serial.js      # Serial bridge Arduino (port 3004)
@@ -218,7 +222,7 @@ Mở trình duyệt: **http://localhost:3000**
 
 | Username | Password | Quyền (admin) | Mô tả |
 |----------|----------|---------------|--------|
-| `admin` | `admin123` | 1 (Toàn quyền) | Xem tất cả 6 tab, chỉnh cấu hình |
+| `admin` | `admin123` | 1 (Toàn quyền) | Xem tất cả 7 tab, chỉnh cấu hình |
 | `nhanvien` | *(đặt khi seed)* | 0 (Giới hạn) | Chỉ xem Tổng quan, Lịch sử, Báo cáo |
 
 ### Phân quyền theo tab
@@ -228,6 +232,7 @@ Mở trình duyệt: **http://localhost:3000**
 | Tổng quan | ✅ | ✅ |
 | Sinh viên | ✅ | ❌ |
 | Giảng viên | ✅ | ❌ |
+| Tài khoản | ✅ | ❌ |
 | Lịch sử | ✅ | ✅ |
 | Báo cáo | ✅ | ✅ |
 | Cấu hình | ✅ | ❌ |
@@ -245,7 +250,7 @@ npm run start   # Chạy trên port 3000
 
 MySQL. Dữ liệu website và database đồng bộ realtime qua Prisma ORM.
 
-### 7 Models (Prisma + MySQL)
+### 8 Models (Prisma + MySQL)
 
 #### `User` — Tài khoản đăng nhập
 | Field | Type | Mô tả |
@@ -304,7 +309,7 @@ MySQL. Dữ liệu website và database đồng bộ realtime qua Prisma ORM.
 | Field | Type | Default |
 |-------|------|---------|
 | id | String | "default" |
-| maxSlots | Int | 6 |
+| maxSlots | Int | 4 |
 | feePerTrip | Int | 2000 (VNĐ) |
 | systemName | String | "BAI DO XE THONG MINH" |
 | isOpen | Boolean | true |
@@ -316,6 +321,15 @@ MySQL. Dữ liệu website và database đồng bộ realtime qua Prisma ORM.
 | totalEntries / totalExits | Int | Số xe vào/ra |
 | totalRevenue | Int | Doanh thu |
 | studentCount / teacherCount | Int | Theo loại |
+
+#### `ActivityLog` — Nhật ký hoạt động
+| Field | Type | Mô tả |
+|-------|------|-------|
+| id | String (cuid) | Primary key |
+| action | String | Loại hành động (LOGIN, VEHICLE_ENTRY, USER_CREATE...) |
+| details | String | Chi tiết |
+| username | String | Người thực hiện |
+| createdAt | DateTime | Thời gian |
 
 ### Query dữ liệu
 
@@ -341,7 +355,7 @@ User nhập username + password + CAPTCHA
   → Tìm user trong MySQL (WHERE username, active=true)
   → bcrypt.compare(password, hash)
   → JWT token tạo (chứa userId, username, role)
-  → Cookie set (httpOnly, expires 24h)
+  → Cookie set (httpOnly, expires 8h)
   → Redirect to /
 ```
 
@@ -434,7 +448,21 @@ UPDATE User SET active = 0 WHERE username = 'someuser';
 |--------|------|-------|
 | POST | `/api/vip` | Toggle VIP cho giảng viên |
 | POST | `/api/sync` | Đồng bộ dữ liệu từ Arduino (internal) |
-| POST | `/api/seed` | Seed dữ liệu mặc định (config + users) |
+| POST | `/api/seed` | Seed dữ liệu mặc định (dev only, **blocked in production**) |
+
+### Users
+| Method | Path | Mô tả |
+|--------|------|-------|
+| GET | `/api/users` | Danh sách tài khoản (admin) |
+| POST | `/api/users` | Tạo tài khoản mới (admin) |
+| PUT | `/api/users` | Sửa tài khoản (admin) |
+| DELETE | `/api/users` | Xóa tài khoản (admin, không xóa chính mình) |
+
+### Activity Logs
+| Method | Path | Mô tả |
+|--------|------|-------|
+| GET | `/api/activity-logs` | Danh sách nhật ký hoạt động (admin) |
+| POST | `/api/activity-logs` | Tạo log (admin, username từ session) |
 
 ---
 
@@ -507,7 +535,7 @@ curl -X POST http://localhost:3004/exit -H "Content-Type: application/json" -d '
 ## ✨ Tính Năng Chính
 
 ### Dashboard
-- **6 tab**: Tổng quan, Sinh viên, Giảng viên, Lịch sử, Báo cáo, Cấu hình
+- **7 tab**: Tổng quan, Sinh viên, Giảng viên, Tài khoản, Lịch sử, Báo cáo, Cấu hình
 - **5 card thống kê**: Xe đang gửi, Sinh viên, Giảng viên, RFID gần nhất, Thu nhập
 - **Dark/Light mode**: Tự động theo hệ thống hoặc toggle thủ công
 - **Responsive**: Desktop, tablet, mobile
@@ -531,7 +559,7 @@ curl -X POST http://localhost:3004/exit -H "Content-Type: application/json" -d '
 - **Xuất PDF**: Print-to-PDF từ browser
 
 ### Xác thực
-- **NextAuth JWT**: Session 24 giờ, auto redirect
+- **NextAuth JWT**: Session 8 giờ, auto redirect
 - **CAPTCHA toán**: Chống brute force
 - **Phân quyền**: admin=1 toàn quyền, admin=0 giới hạn tab
 - **Quản lý qua MySQL**: Thêm/sửa quyền trực tiếp trong DB
@@ -635,6 +663,18 @@ crontab -e
 ---
 
 ## 📝 Lịch Sử Cập Nhật
+
+### v0.4.3 — Bảo mật & Fix README
+- **NEXTAUTH_SECRET**: Thêm secret JWT vào .env
+- **Block /api/seed**: Block hoàn toàn trong production (return 404)
+- **Security headers**: Thêm X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
+- **Username enumeration**: Đổi lỗi đăng nhập thành thông báo chung
+- **Audit log poisoning**: Whitelist actions, ép username từ session
+- **Self-delete bypass**: Lấy username từ session thay vì client body
+- **Password complexity**: Yêu cầu mật khẩu tối thiểu 6 ký tự
+- **CORS restrict**: WebSocket + Serial bridge giới hạn localhost only
+- **Session timeout**: Giảm từ 24h → 8h
+- **Serial bridge**: Bind 127.0.0.1 thay vì 0.0.0.0
 
 ### v0.4.2 — Tối ưu Arduino & Excel đẹp
 - **Arduino non-blocking**: Fire/gas alarm dùng millis() thay vì while() chặn
