@@ -187,7 +187,7 @@ npm install
 
 # 2. Cấu hình .env
 cat > .env << 'EOF'
-DATABASE_URL=mysql://vinh:123456@localhost:3306/parking_db
+DATABASE_URL=mysql://USER:PASSWORD@localhost:3306/parking_db
 NEXTAUTH_SECRET=your-random-secret-string-min-32-chars
 NEXTAUTH_URL=http://localhost:3000
 WS_PORT=3003
@@ -219,7 +219,7 @@ Mở trình duyệt: **http://localhost:3000**
 | Username | Password | Quyền (admin) | Mô tả |
 |----------|----------|---------------|--------|
 | `admin` | `admin123` | 1 (Toàn quyền) | Xem tất cả 6 tab, chỉnh cấu hình |
-| `nhanvien` | `nv123456` | 0 (Giới hạn) | Chỉ xem Tổng quan, Lịch sử, Báo cáo |
+| `nhanvien` | *(đặt khi seed)* | 0 (Giới hạn) | Chỉ xem Tổng quan, Lịch sử, Báo cáo |
 
 ### Phân quyền theo tab
 
@@ -580,7 +580,7 @@ curl -X POST http://localhost:3004/exit -H "Content-Type: application/json" -d '
 
 ### MySQL connection refused
 1. Kiểm tra MySQL đang chạy: `systemctl status mysql` (Linux) hoặc kiểm tra Services (Windows)
-2. Kiểm tra `.env` đúng: `DATABASE_URL=mysql://vinh:123456@localhost:3306/parking_db`
+2. Kiểm tra `.env` đúng: `DATABASE_URL=mysql://USER:PASSWORD@localhost:3306/parking_db`
 3. Đảm bảo database đã tạo: `CREATE DATABASE parking_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
 4. Push schema: `npx prisma db push`
 
@@ -629,7 +629,7 @@ npx prisma db push
 # Thêm vào crontab (chạy mỗi ngày 2h sáng)
 crontab -e
 # Thêm dòng:
-0 2 * * * mysqldump -u root -p123456 parking_db > /path/to/backup/parking_$(date +\%Y\%m\%d).sql
+0 2 * * * mysqldump -u root -p parking_db > /path/to/backup/parking_$(date +\%Y\%m\%d).sql
 ```
 
 ---

@@ -27,8 +27,9 @@ try { require('dotenv').config({ path: require('path').resolve(__dirname, '../..
 const PORT = process.env.WS_PORT || 3003
 
 const io = new Server(PORT, {
+  // 🔒 Restrict CORS to localhost only
   cors: {
-    origin: '*',
+    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
     methods: ['GET', 'POST'],
   },
   pingInterval: 10000,

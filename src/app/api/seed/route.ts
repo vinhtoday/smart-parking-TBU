@@ -2,8 +2,16 @@ import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import bcrypt from 'bcryptjs'
 
-// POST - Seed default data
+// POST - Seed default data (BLOCKED in production)
 export async function POST() {
+  // 🔒 Block seed in production
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { success: false, error: 'Seed endpoint is disabled in production' },
+      { status: 404 }
+    )
+  }
+
   try {
     // Seed default config if not exists
     const existingConfig = await db.parkingConfig.findUnique({

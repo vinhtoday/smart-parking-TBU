@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { requireAdmin } from '@/lib/api-auth'
 
+// 🔒 Allowed actions whitelist
+const ALLOWED_ACTIONS = [
+  'LOGIN', 'LOGOUT',
+  'VEHICLE_ENTRY', 'VEHICLE_EXIT', 'VEHICLE_DELETE',
+  'CONFIG_UPDATE',
+  'USER_CREATE', 'USER_UPDATE', 'USER_DELETE',
+  'STUDENT_CREATE', 'STUDENT_UPDATE', 'STUDENT_DELETE',
+  'TEACHER_CREATE', 'TEACHER_UPDATE', 'TEACHER_DELETE',
+] as const
+
 // GET - List activity logs
 export async function GET(request: NextRequest) {
   try {
@@ -11,8 +21,8 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const limit = parseInt(searchParams.get('limit') || '50')
-    const offset = parseInt(searchParams.get('offset') || '0')
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50') || 50, 500)
+    const offset = Math.max(parseInt(searchParams.get('offset') || '0') || 0, 0)
 
     const logs = await db.activityLog.findMany({
       orderBy: { createdAt: 'desc' },
@@ -39,20 +49,21 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { action, details, username } = body
+    const { action, details } = body
 
-    if (!action) {
+    if (!action || !ALLOWED_ACTIONS.includes(action as typeof ALLOWED_ACTIONS[number])) {
       return NextResponse.json(
-        { success: false, error: 'Thiếu action' },
+        { success: false, error: 'Action không hợp lệ' },
         { status: 400 }
       )
     }
 
+    // 🔒 Force username from session — ignore client-supplied value
     const log = await db.activityLog.create({
       data: {
         action,
-        details: details || '',
-        username: username || '',
+        details: typeof details === 'string' ? details.substring(0, 500) : '',
+        username: auth.user.username,
       },
     })
 

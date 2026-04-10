@@ -75,6 +75,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 🔒 Password complexity
+    if (password.length < 6) {
+      return NextResponse.json(
+        { success: false, error: 'Mật khẩu phải có ít nhất 6 ký tự' },
+        { status: 400 }
+      )
+    }
+    if (username.length < 3 || username.length > 30) {
+      return NextResponse.json(
+        { success: false, error: 'Username phải từ 3-30 ký tự' },
+        { status: 400 }
+      )
+    }
+
     // Check username uniqueness
     const existing = await db.user.findUnique({ where: { username } })
     if (existing) {
@@ -215,7 +229,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { id, currentUsername } = body
+    const { id } = body
 
     if (!id) {
       return NextResponse.json(
@@ -232,8 +246,8 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Prevent deleting self
-    if (currentUsername && user.username === currentUsername) {
+    // Prevent deleting self - 🔒 Lấy username từ session, KHÔNG tin client
+    if (auth.user.username === user.username) {
       return NextResponse.json(
         { success: false, error: 'Không thể xóa tài khoản của chính mình' },
         { status: 403 }
@@ -242,10 +256,10 @@ export async function DELETE(request: NextRequest) {
 
     await db.user.delete({ where: { id } })
 
-    // Log activity
+    // Log activity - 🔒 Dùng username từ session
     try {
       await db.activityLog.create({
-        data: { action: 'USER_DELETE', details: `Xóa tài khoản: ${user.username} (${user.name})`, username: currentUsername || '' },
+        data: { action: 'USER_DELETE', details: `Xóa tài khoản: ${user.username} (${user.name})`, username: auth.user.username },
       })
     } catch {}
 

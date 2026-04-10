@@ -452,7 +452,8 @@ function sendToArduino(cmd) {
 // HTTP Server
 // ========================
 const server = http.createServer((req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*')
+  // 🔒 Restrict CORS to localhost only
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 
@@ -656,7 +657,7 @@ const server = http.createServer((req, res) => {
   res.end(JSON.stringify({ success: false, error: 'Endpoint không tồn tại' }))
 })
 
-server.listen(PORT, async () => {
+server.listen(PORT, '127.0.0.1', async () => {
   console.log('')
   console.log('========================================')
   console.log('  🔌 Arduino Serial Bridge')

@@ -57,18 +57,9 @@ export const authOptions: NextAuthOptions = {
           where: { username: credentials.username },
         })
 
-        if (!user) {
-          throw new Error('Tên đăng nhập không tồn tại')
-        }
-
-        if (!user.active) {
-          throw new Error('Tài khoản đã bị vô hiệu hóa')
-        }
-
-        // Kiểm tra mật khẩu
-        const isValid = await bcrypt.compare(credentials.password, user.password)
-        if (!isValid) {
-          throw new Error('Mật khẩu không chính xác')
+        if (!user || !user.active || !(await bcrypt.compare(credentials.password, user.password))) {
+          // 🔒 Generic error - không lộ username tồn tại hay không
+          throw new Error('Tên đăng nhập hoặc mật khẩu không chính xác')
         }
 
         // Log LOGIN activity
@@ -112,7 +103,7 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: 'jwt',
-    maxAge: 24 * 60 * 60, // 24 giờ
+    maxAge: 8 * 60 * 60, // 8 giờ (giảm từ 24h)
   },
   secret: process.env.NEXTAUTH_SECRET,
 }
