@@ -1,5 +1,8 @@
 'use client'
 
+import { useState } from 'react'
+import { toast } from 'sonner'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -63,6 +66,14 @@ export default function TeachersTab({
   handleToggleVip,
   copyToClipboard,
 }: TeachersTabProps) {
+  const [pendingDelete, setPendingDelete] = useState<{id: string; name: string} | null>(null)
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return
+    await handleDeleteTeacher(pendingDelete.id, pendingDelete.name)
+    setPendingDelete(null)
+  }
+
   return (
     <div className="space-y-4">
       <Card>
@@ -226,9 +237,7 @@ export default function TeachersTab({
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 text-red-500 hover:text-red-600"
-                            onClick={() => {
-                              if (confirm(`Xóa giảng viên ${t.name}?`)) handleDeleteTeacher(t.id, t.name)
-                            }}
+                            onClick={() => setPendingDelete({ id: t.id, name: t.name })}
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
@@ -283,6 +292,22 @@ export default function TeachersTab({
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditTeacherOpen(false)}>Hủy</Button>
             <Button onClick={handleEditTeacher}>Cập nhật</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!pendingDelete} onOpenChange={(open) => { if (!open) setPendingDelete(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa</DialogTitle>
+            <DialogDescription>
+              Bạn có chắc muốn xóa giảng viên &quot;{pendingDelete?.name}&quot;?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPendingDelete(null)}>Hủy</Button>
+            <Button variant="destructive" onClick={confirmDelete}>Xóa</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

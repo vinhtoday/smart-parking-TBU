@@ -232,7 +232,8 @@ export async function DELETE(request: NextRequest) {
 
     // Notify Arduino Serial Bridge immediately — tell Arduino to open barrier
     try {
-      await fetch('http://localhost:3004/command', {
+      const serialPort = process.env.SERIAL_PORT || '3004'
+      await fetch(`http://127.0.0.1:${serialPort}/command`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ command: JSON.stringify({ type: 'WEB_RESPONSE', action: 'VEHICLE_EXIT', success: true, rfidUid, fee, duration, message: 'OK_EXIT' }) }),

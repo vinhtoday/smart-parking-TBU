@@ -21,7 +21,6 @@ import {
 import {
   formatVND, formatDuration, formatTime, elapsedSince,
 } from '@/lib/format'
-import PersonBadge from '@/components/PersonBadge'
 import { PersonTypeBadge, VipBadge } from '@/components/PersonTypeBadge'
 import type { Stats, ParkedVehicle } from '@/types/parking'
 

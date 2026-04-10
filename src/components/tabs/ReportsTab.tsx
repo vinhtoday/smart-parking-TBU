@@ -3,7 +3,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -20,7 +19,6 @@ import {
 } from 'recharts'
 
 import { formatVND, formatDuration, formatDate, formatDateParam } from '@/lib/format'
-import PersonBadge from '@/components/PersonBadge'
 import { PersonTypeBadge, VipBadge } from '@/components/PersonTypeBadge'
 import type { ReportData, ReportPeriod } from '@/types/parking'
 

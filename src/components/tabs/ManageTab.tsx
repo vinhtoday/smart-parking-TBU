@@ -49,6 +49,7 @@ export default function ManageTab({
   const [addOpen, setAddOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [editUser, setEditUser] = useState<UserAccount | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<UserAccount | null>(null)
 
   // Add form
   const [addForm, setAddForm] = useState({
@@ -121,13 +122,13 @@ export default function ManageTab({
     }
   }
 
-  const handleDelete = async (user: UserAccount) => {
-    if (!confirm(`Xóa tài khoản "${user.name}" (${user.username})?`)) return
+  const handleDelete = async () => {
+    if (!deleteTarget) return
     try {
       const res = await fetch('/api/users', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: user.id, currentUsername: currentUserUsername }),
+        body: JSON.stringify({ id: deleteTarget.id, currentUsername: currentUserUsername }),
       })
       const json = await res.json()
       if (json.success) {
@@ -138,6 +139,8 @@ export default function ManageTab({
       }
     } catch {
       toast.error('Lỗi khi xóa tài khoản')
+    } finally {
+      setDeleteTarget(null)
     }
   }
 
@@ -334,7 +337,7 @@ export default function ManageTab({
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 text-red-500 hover:text-red-600"
-                            onClick={() => handleDelete(u)}
+                            onClick={() => setDeleteTarget(u)}
                             disabled={u.username === currentUserUsername}
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -398,6 +401,22 @@ export default function ManageTab({
           <DialogFooter>
             <Button variant="outline" onClick={() => { setEditOpen(false); setEditUser(null) }}>Hủy</Button>
             <Button onClick={handleEdit}>Cập nhật</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa</DialogTitle>
+            <DialogDescription>
+              Bạn có chắc muốn xóa tài khoản &quot;{deleteTarget?.name}&quot; ({deleteTarget?.username})? Hành động này không thể hoàn tác.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>Hủy</Button>
+            <Button variant="destructive" onClick={handleDelete}>Xóa</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

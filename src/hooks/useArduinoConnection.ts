@@ -14,7 +14,8 @@ export function useArduinoConnection() {
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 3000)
-      const res = await fetch('http://localhost:3004/status', { signal: controller.signal })
+      const serialUrl = process.env.NEXT_PUBLIC_SERIAL_URL || 'http://localhost:3004'
+      const res = await fetch(`${serialUrl}/status`, { signal: controller.signal })
       clearTimeout(timeoutId)
       const json: ArduinoStatus = await res.json()
       setConnected(json.connected === true)
@@ -29,7 +30,8 @@ export function useArduinoConnection() {
   const connectSerial = useCallback(async (port: string) => {
     setConnecting(true)
     try {
-      const res = await fetch('http://localhost:3004/connect', {
+      const serialUrl = process.env.NEXT_PUBLIC_SERIAL_URL || 'http://localhost:3004'
+      const res = await fetch(`${serialUrl}/connect`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ port }),
