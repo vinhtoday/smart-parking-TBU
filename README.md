@@ -6,17 +6,18 @@
 
 ## 📋 Mục Lục
 
-- [Tổng quan](#-tổng-quan)
-- [Kiến trúc hệ thống](#-kiến-trúc-hệ-thống)
-- [Công nghệ sử dụng](#-công-nghệ-sử-dụng)
-- [Cấu trúc thư mục](#-cấu-trúc-thư-mục)
-- [Cài đặt & Triển khai](#-cài-đặt--triển-khai)
-- [Cơ sở dữ liệu](#-cơ-sở-dữ-liệu)
-- [Hệ thống xác thực](#-hệ-thống-xác-thực)
-- [API Endpoints](#-api-endpoints)
-- [Arduino & Hardware](#-arduino--hardware)
-- [Tính năng chính](#-tính-năng-chính)
-- [Lịch sử cập nhật](#-lịch-sử-cập nhật)
+- [Tổng quan](#tổng-quan)
+- [Kiến trúc hệ thống](#kiến-trúc-hệ-thống)
+- [Công nghệ sử dụng](#công-nghệ-sử-dụng)
+- [Cấu trúc thư mục](#cấu-trúc-thư-mục)
+- [Cài đặt & Triển khai](#cài-đặt--triển-khai)
+- [Cơ sở dữ liệu](#cơ-sở-dữ-liệu)
+- [Hệ thống xác thực](#hệ-thống-xác-thực)
+- [API Endpoints](#api-endpoints)
+- [Arduino & Hardware](#arduino--hardware)
+- [Tính năng chính](#tính-năng-chính)
+- [Bảo mật](#bảo-mật)
+- [Lịch sử cập nhật](#lịch-sử-cập-nhật)
 
 ---
 
@@ -136,8 +137,7 @@ my-project/
 │   │       └── vip/route.ts       # POST toggle VIP
 │   ├── components/
 │   │   ├── NextAuthProvider.tsx   # Client SessionProvider wrapper
-│   │   ├── PersonBadge.tsx        # Badge VIP/SV/GV/Khách (compact)
-│   │   ├── PersonTypeBadge.tsx    # Badge loại người (SV/GV/Khách)
+│   │   ├── PersonTypeBadge.tsx    # Badge loại người (SV/GV/Khách) + VipBadge
 │   │   ├── tabs/
 │   │   │   ├── OverviewTab.tsx    # Tổng quan + bảng xe đang đỗ
 │   │   │   ├── StudentsTab.tsx    # Quản lý sinh viên (CRUD)
@@ -156,8 +156,8 @@ my-project/
 │   │   ├── auth.ts                # NextAuth config + CAPTCHA verify
 │   │   ├── db.ts                  # Prisma singleton connection
 │   │   ├── format.ts              # Format VND, datetime, duration, Excel, PDF
-│   │   ├── api-auth.ts            # requireAuth() + requireAdmin() helpers
-│   │   ├── rate-limit.ts          # In-memory rate limiter
+│   │   ├── api-auth.ts            # verifyArduinoSecret() + requireAuth() + requireAdmin()
+│   │   ├── rate-limit.ts          # In-memory rate limiter (TODO: Redis for production)
 │   │   └── utils.ts               # cn() helper cho Tailwind
 │   ├── mini-services/
 │   │   ├── parking-serial.js      # Serial bridge Arduino (port 3004)
@@ -202,6 +202,8 @@ WS_PORT=3003
 SERIAL_PORT=3004
 ARDUINO_SERIAL_PORT=COM5
 ARDUINO_BAUD_RATE=9600
+ARDUINO_API_SECRET=your-arduino-api-secret-change-this
+ARDUINO_WS_SECRET=your-arduino-ws-secret-change-this
 EOF
 
 # 3. Tạo database MySQL
@@ -226,8 +228,12 @@ Mở trình duyệt: **http://localhost:3000**
 
 | Username | Password | Quyền (admin) | Mô tả |
 |----------|----------|---------------|--------|
-| `admin` | `admin123` | 1 (Toàn quyền) | Xem tất cả 7 tab, chỉnh cấu hình |
+| `admin` | `admin123` | 1 (Toàn quyền) | Xem tất cả 7 tab, chỉnh cấu hình, quản lý user |
 | `nhanvien` | `nv123456` | 0 (Giới hạn) | Chỉ xem Tổng quan, Lịch sử, Báo cáo |
+
+> ⚠️ **Đổi mật khẩu ngay sau lần đăng nhập đầu tiên!** Seed chỉ chạy trong development (`NODE_ENV ≠ production`).
+
+> 🔑 **Secret keys**: `ARDUINO_API_SECRET` và `ARDUINO_WS_SECRET` bảo vệ API/WS khỏi gọi trái phép. Phải đặt **giá trị ngẫu nhiên mạnh** cho production!
 
 ### Phân quyền theo tab
 
@@ -313,7 +319,7 @@ MySQL. Dữ liệu website và database đồng bộ realtime qua Prisma ORM.
 | Field | Type | Default |
 |-------|------|---------|
 | id | String | "default" |
-| maxSlots | Int | 4 |
+| maxSlots | Int | 6 |
 | feePerTrip | Int | 2000 (VNĐ) |
 | systemName | String | "BAI DO XE THONG MINH" |
 | isOpen | Boolean | true |
@@ -389,10 +395,10 @@ UPDATE User SET active = 0 WHERE username = 'someuser';
 
 ### CAPTCHA
 
-- Math-based tự sinh trên client (cộng, trừ, nhân số nhỏ)
-- Server-side verify trong authorize() callback
+- Math-based tự sinh trên client (cộng/trừ/nhân, số 2-54)
+- Server-side verify: reject số < 2, reject kết quả âm (trừ)
 - Nút "Đổi mã" để refresh
-- Hiển thị dạng toán: `7 × 3 = ?`
+- Hiển thị dạng toán: `37 × 8 = ?`
 
 ---
 
@@ -421,8 +427,8 @@ UPDATE User SET active = 0 WHERE username = 'someuser';
 | Method | Path | Mô tả |
 |--------|------|-------|
 | GET | `/api/vehicles` | Danh sách xe đang đỗ |
-| POST | `/api/vehicles` | Thêm xe thủ công |
-| DELETE | `/api/vehicles` | Xử lý xe ra (tạo history) |
+| POST | `/api/vehicles` | Thêm xe (Arduino: cần secret header, Web: cần session) |
+| DELETE | `/api/vehicles` | Xử lý xe ra (Arduino: cần secret header, Web: cần session) |
 
 ### Students
 | Method | Path | Mô tả |
@@ -459,7 +465,7 @@ UPDATE User SET active = 0 WHERE username = 'someuser';
 | Method | Path | Mô tả |
 |--------|------|-------|
 | POST | `/api/vip` | Toggle VIP cho giảng viên |
-| POST | `/api/sync` | Đồng bộ dữ liệu từ Arduino (internal) |
+| POST | `/api/sync` | Đồng bộ từ Arduino (cần `X-Arduino-Secret` header) |
 | POST | `/api/seed` | Seed dữ liệu mặc định (dev only, **blocked in production**) |
 
 ### Users
@@ -496,7 +502,7 @@ UPDATE User SET active = 0 WHERE username = 'someuser';
 Chỉnh sửa trực tiếp trong code Arduino rồi nạp lại (giá trị này **độc lập** với `maxSlots` trên web config):
 
 ```c
-#define MAX_SLOTS    6    // Số vị trí đỗ tối đa (web config mặc định = 4, có thể khác)
+#define MAX_SLOTS    6    // Số vị trí đỗ tối đa (phải khớp với web config maxSlots)
 #define MAX_VIP_SIZE 3    // Số thẻ VIP tối đa
 ```
 
@@ -674,7 +680,87 @@ crontab -e
 
 ---
 
+## 🛡️ Bảo Mật
+
+### Kiến trúc bảo vệ API
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Arduino Serial Bridge (parking-serial.js)                    │
+│  ┌─ POST /api/vehicles ──── Header: X-Arduino-Secret ──────┐ │
+│  ├─ DELETE /api/vehicles ─ Header: X-Arduino-Secret ──────┤ │
+│  ├─ POST /api/sync ───────── Header: X-Arduino-Secret ──────┤ │
+│  └─ Socket.IO (bridge) ─── Auth: { type, secret } ─────────┘ │
+│                                                              │
+│  Web Dashboard (browser)                                     │
+│  ┌─ POST/DELETE /api/vehicles ── NextAuth session ─────────┐ │
+│  ├─ GET /api/vehicles ──────── Public (read-only) ──────────┤ │
+│  ├─ /api/students, teachers ── requireAuth/requireAdmin ───┤ │
+│  └─ /api/users, config PUT ─── requireAdmin ───────────────┘ │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Arduino Shared Secret (`ARDUINO_API_SECRET`)
+
+API endpoints `/api/vehicles` (POST/DELETE) và `/api/sync` (POST) yêu cầu header `X-Arduino-Secret`. Arduino Serial Bridge tự gửi header này trên mọi request.
+
+- **Nếu không set env var** → cho phép tất cả (dev mode)
+- **Nếu set env var** → chỉ cho phép request có header khớp exact
+- **Web dashboard** → dùng NextAuth session (không cần secret)
+
+### WebSocket Bridge Auth (`ARDUINO_WS_SECRET`)
+
+`parking-ws.js` (port 3003) yêu cầu bridge gửi `auth: { type: 'bridge', secret }` khi kết nối. Nếu secret sai hoặc thiếu → disconnect ngay.
+
+### Command Whitelist (parking-serial.js)
+
+Endpoint `POST /command` chỉ cho phép các lệnh an toàn:
+`SYNC`, `STATUS`, `OPEN`, `CLOSE`, `BUZZER`, `RESET`, và JSON `WEB_RESPONSE`.
+Các lệnh khác → trả 403 Forbidden.
+
+### CAPTCHA nâng cao
+
+- Số phạm vi lớn hơn: cộng/trừ 10-54, nhân 2-10
+- Server-side reject số < 2, reject phép trừ có kết quả âm
+- Rate limit 5 lần/phút theo username
+
+### Security Headers
+
+| Header | Value |
+|--------|-------|
+| X-Frame-Options | DENY |
+| X-Content-Type-Options | nosniff |
+| Referrer-Policy | strict-origin-when-cross-origin |
+| Permissions-Policy | camera=(), microphone=(), geolocation=() |
+| X-XSS-Protection | 1; mode=block |
+| Content-Security-Policy | default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; ... |
+
+### Rate Limiting
+
+| Endpoint | Limit | Key |
+|----------|-------|-----|
+| Login | 5 lần/phút | Username |
+| CRUD API | 30 req/phút | IP |
+
+> ⚠️ Rate limiter hiện dùng in-memory Map — data mất khi restart. Production nên dùng Redis.
+
+---
+
 ## 📝 Lịch Sử Cập Nhật
+
+### v0.4.4 — Security Audit & Code Quality
+- **Arduino API Secret**: Thêm `ARDUINO_API_SECRET` — POST/DELETE `/api/vehicles` và POST `/api/sync` yêu cầu header `X-Arduino-Secret`
+- **WebSocket Bridge Auth**: Thêm `ARDUINO_WS_SECRET` — verify bridge secret khi kết nối `parking-ws.js`
+- **CAPTCHA nâng cao**: Tăng range số (2-54), server-side reject số < 2 và kết quả âm
+- **Content-Security-Policy**: Thêm CSP header chống XSS
+- **Command Whitelist**: `/command` endpoint chỉ cho phép lệnh an toàn (SYNC, STATUS, OPEN, CLOSE, BUZZER, RESET)
+- **feePerTrip validation**: PUT `/api/config` validate giá trị (integer 0-1.000.000)
+- **MAX_SLOTS đồng bộ**: Sửa DB seed `maxSlots` 4→6 (khớp Arduino `MAX_SLOTS=6`)
+- **TypeScript strict**: `ignoreBuildErrors: false`, `reactStrictMode: true`
+- **ESLint nâng cấp**: Bật `no-explicit-any`, `no-unused-vars`, `prefer-const` (warn)
+- **Cleanup**: Xóa `PersonBadge.tsx` (trùng `PersonTypeBadge.tsx`), xóa `package-lock.json`, xóa `.accesslog/.stats` khỏi git
+- **CORS header**: Serial bridge thêm `X-Arduino-Secret` vào `Access-Control-Allow-Headers`
+- **Rate limiter**: Thêm TODO comment về Redis migration cho production
 
 ### v0.4.3 — Bảo mật & Fix README
 - **NEXTAUTH_SECRET**: Thêm secret JWT vào .env
