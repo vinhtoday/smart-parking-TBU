@@ -86,7 +86,7 @@ RFID quét thẻ → Arduino gửi UID qua Serial → Mini-service xử lý
 | **Framework** | Next.js (App Router + Turbopack) | 16.1.1 |
 | **Language** | TypeScript | 5.x |
 | **Runtime** | Bun | latest |
-| **Database** | MySQL (Prisma ORM) | 6.19.2 |
+| **Database** | MySQL (Prisma ORM) | 6.11.1 |
 | **UI Library** | shadcn/ui + Radix UI | latest |
 | **Excel Export** | ExcelJS | 4.4.0 |
 | **Charts** | Recharts | 3.8.1 |
@@ -123,6 +123,7 @@ my-project/
 │   │       ├── config/route.ts    # GET/PUT cấu hình
 │   │       ├── history/route.ts   # GET lịch sử + phân trang + lọc ngày
 │   │       ├── report/route.ts    # GET báo cáo + doanh thu ngày
+│   │       ├── guests/route.ts   # GET/POST khách vãng lai
 │   │       ├── seed/route.ts      # POST seed dữ liệu (dev only, blocked in prod)
 │   │       ├── stats/route.ts     # GET thống kê realtime
 │   │       ├── students/route.ts  # CRUD sinh viên
@@ -133,6 +134,7 @@ my-project/
 │   │       └── vip/route.ts       # POST toggle VIP
 │   ├── components/
 │   │   ├── NextAuthProvider.tsx   # Client SessionProvider wrapper
+│   │   ├── PersonBadge.tsx        # Badge VIP/SV/GV/Khách (compact)
 │   │   ├── PersonTypeBadge.tsx    # Badge loại người (SV/GV/Khách)
 │   │   ├── tabs/
 │   │   │   ├── OverviewTab.tsx    # Tổng quan + bảng xe đang đỗ
@@ -317,6 +319,7 @@ MySQL. Dữ liệu website và database đồng bộ realtime qua Prisma ORM.
 #### `DailyStats` — Thống kê hàng ngày
 | Field | Type | Mô tả |
 |-------|------|-------|
+| id | String (cuid) | Primary key |
 | date | String (unique) | Ngày (YYYY-MM-DD) |
 | totalEntries / totalExits | Int | Số xe vào/ra |
 | totalRevenue | Int | Doanh thu |
@@ -365,7 +368,8 @@ User nhập username + password + CAPTCHA
 Mọi request → withAuth middleware
   → Chưa có session → Redirect /login
   → Có session → Cho qua
-  → Bỏ qua: /login, /api/auth/*, /api/seed, static files
+  → Bỏ qua: /login, /api/* (TẤT CẢ API routes — Arduino/serial bridge cần gọi không cần auth), static files
+  → Mỗi API route tự bảo vệ bằng requireAuth() / requireAdmin() trong api-auth.ts
 ```
 
 ### Quản lý quyền qua MySQL
@@ -404,6 +408,12 @@ UPDATE User SET active = 0 WHERE username = 'someuser';
 |--------|------|-------|
 | GET | `/api/config` | Lấy cấu hình hệ thống |
 | PUT | `/api/config` | Cập nhật cấu hình (feePerTrip) |
+
+### Guests
+| Method | Path | Query Params | Mô tả |
+|--------|------|-------------|-------|
+| GET | `/api/guests` | `history=true` | Danh sách khách đang đỗ (hoặc lịch sử khách) |
+| POST | `/api/guests` | — | Thêm khách vãng lai thủ công |
 
 ### Vehicles
 | Method | Path | Mô tả |
@@ -481,10 +491,10 @@ UPDATE User SET active = 0 WHERE username = 'someuser';
 
 ### Cấu hình Arduino
 
-Chỉnh sửa trực tiếp trong code Arduino rồi nạp lại:
+Chỉnh sửa trực tiếp trong code Arduino rồi nạp lại (giá trị này **độc lập** với `maxSlots` trên web config):
 
 ```c
-#define MAX_SLOTS    6    // Số vị trí đỗ tối đa
+#define MAX_SLOTS    6    // Số vị trí đỗ tối đa (web config mặc định = 4, có thể khác)
 #define MAX_VIP_SIZE 3    // Số thẻ VIP tối đa
 ```
 
@@ -571,7 +581,7 @@ curl -X POST http://localhost:3004/exit -H "Content-Type: application/json" -d '
 | Sinh viên | Theo cấu hình (mặc định 2,000đ) |
 | Giảng viên thường | Theo cấu hình (mặc định 2,000đ) |
 | Giảng viên VIP | Miễn phí |
-| Khách | Không tính tiền |
+| Khách | Theo cấu hình (mặc định 2,000đ) |
 
 ### Arduino Integration
 - **Serial bridge**: Node.js ↔ Arduino qua serialport (9600 baud)
