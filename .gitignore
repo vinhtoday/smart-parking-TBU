@@ -53,8 +53,6 @@ Caddyfile
 /src/app/api/route.ts
 /src/arduino/
 /examples/
-/mini-services/parking-serial/
-/mini-services/parking-ws/
 
 # unused UI components
 /src/components/ui/accordion.tsx

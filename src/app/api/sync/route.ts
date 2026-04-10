@@ -96,12 +96,13 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Update daily stats — only create if not exists, don't overwrite cumulative counters
+      // Update daily stats — refresh live counts from Arduino on every sync
       const today = todayStr()
       await tx.dailyStats.upsert({
         where: { date: today },
         update: {
-          // Don't overwrite cumulative counters maintained by vehicles API
+          studentCount: studentCount ?? 0,
+          teacherCount: teacherCount ?? 0,
         },
         create: {
           date: today,

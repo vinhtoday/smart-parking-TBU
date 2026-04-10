@@ -113,10 +113,11 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Log VEHICLE_ENTRY activity
+    // Log VEHICLE_ENTRY activity — use 'arduino' as source when triggered by Arduino
+    const source = isArduino ? 'arduino' : (auth?.user?.username || 'unknown')
     try {
       await db.activityLog.create({
-        data: { action: 'VEHICLE_ENTRY', details: `Xe vào: ${realName} (${rfidUid}) - Loại: ${realType}${realVip ? ' VIP' : ''}` },
+        data: { action: 'VEHICLE_ENTRY', details: `Xe vào: ${realName} (${rfidUid}) - Loại: ${realType}${realVip ? ' VIP' : ''}`, username: source },
       })
     } catch {}
 
@@ -239,10 +240,11 @@ export async function DELETE(request: NextRequest) {
       return history
     })
 
-    // Log VEHICLE_EXIT activity
+    // Log VEHICLE_EXIT activity — use 'arduino' as source when triggered by Arduino
+    const exitSource = isArduino ? 'arduino' : (auth?.user?.username || 'unknown')
     try {
       await db.activityLog.create({
-        data: { action: 'VEHICLE_EXIT', details: `Xe ra: ${vehicle.personName} (${rfidUid}) - ${duration}s - Phí: ${fee}đ` },
+        data: { action: 'VEHICLE_EXIT', details: `Xe ra: ${vehicle.personName} (${rfidUid}) - ${duration}s - Phí: ${fee}đ`, username: exitSource },
       })
     } catch {}
 

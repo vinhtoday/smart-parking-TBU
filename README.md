@@ -16,11 +16,14 @@
 - [API Endpoints](#api-endpoints)
 - [Arduino & Hardware](#arduino--hardware)
 - [Tính năng chính](#tính-năng-chính)
+- [Troubleshooting](#troubleshooting)
+- [Backup & Restore](#backup--restore)
 - [Bảo mật](#bảo-mật)
-- [Lịch sử cập nhật](#lịch-sử-cập-nhật)
+- [Lịch sử cập nhật](#lich-su-cap-nhat)
 
 ---
 
+<a id="tổng-quan"></a>
 ## 🎯 Tổng Quan
 
 Hệ thống bãi đỗ xe thông minh được phát triển cho Trường Đại học Thái Bình, tích hợp:
@@ -40,6 +43,7 @@ RFID quét thẻ → Arduino gửi UID qua Serial → Mini-service xử lý
 
 ---
 
+<a id="kiến-trúc-hệ-thống"></a>
 ## 🏗️ Kiến Trúc Hệ Thống
 
 ```
@@ -81,11 +85,13 @@ RFID quét thẻ → Arduino gửi UID qua Serial → Mini-service xử lý
 
 ---
 
+<a id="công-nghệ-sử-dụng"></a>
 ## 💻 Công Nghệ Sử Dụng
 
 | Category | Technology | Version |
 |----------|-----------|---------|
 | **Framework** | Next.js (App Router + Turbopack) | 16.1.1 |
+| **Env Config** | dotenv | 17.4.1 |
 | **Language** | TypeScript | 5.x |
 | **Runtime** | Bun | latest |
 | **Database** | MySQL (Prisma ORM) | 6.11.1 |
@@ -103,6 +109,7 @@ RFID quét thẻ → Arduino gửi UID qua Serial → Mini-service xử lý
 
 ---
 
+<a id="cấu-trúc-thư-mục"></a>
 ## 📁 Cấu Trúc Thư Mục
 
 ```
@@ -169,14 +176,17 @@ my-project/
 │       └── next-auth.d.ts         # NextAuth type augmentation
 ├── download/
 │   └── parking_arduino_school.ino # Arduino firmware (RFID + sensors + LCD)
-├── .env                          # DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL
+├── .env.example                    # Mẫu biến môi trường (copy → .env)
+├── .env                          # DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL (không commit)
 ├── package.json
 ├── next.config.ts
+├── start-dev.sh                  # Script khởi động tất cả services
 └── README.md                     # File này
 ```
 
 ---
 
+<a id="cài-đặt--triển-khai"></a>
 ## 🚀 Cài Đặt & Triển Khai
 
 ### Yêu cầu
@@ -193,11 +203,17 @@ git clone <repo>
 cd my-project
 bun install
 
-# 2. Cấu hình .env
+# 2. Cấu hình .env từ file mẫu
+cp .env.example .env
+# → Chỉnh sửa .env: DATABASE_URL, NEXTAUTH_SECRET, ARDUINO_API_SECRET...
+# Xem .env.example để biết đầy đủ các biến môi trường
+
+# HOẶC tạo thủ công:
 cat > .env << 'EOF'
 DATABASE_URL=mysql://USER:PASSWORD@localhost:3306/parking_db
 NEXTAUTH_SECRET=your-random-secret-string-min-32-chars
 NEXTAUTH_URL=http://localhost:3000
+NEXT_PUBLIC_WS_URL=http://localhost:3003
 WS_PORT=3003
 SERIAL_PORT=3004
 ARDUINO_SERIAL_PORT=COM5
@@ -235,6 +251,8 @@ Mở trình duyệt: **http://localhost:3000**
 
 > 🔑 **Secret keys**: `ARDUINO_API_SECRET` và `ARDUINO_WS_SECRET` bảo vệ API/WS khỏi gọi trái phép. Phải đặt **giá trị ngẫu nhiên mạnh** cho production!
 
+> 🌐 **WebSocket URL**: `NEXT_PUBLIC_WS_URL` quyết định trình duyệt kết nối Socket.IO server nào. Default `http://localhost:3003`. Khi deploy production, đổi thành domain thực (ví dụ: `wss://parking.tbu.edu.vn`).
+
 ### Phân quyền theo tab
 
 | Tab | admin=1 | admin=0 |
@@ -256,6 +274,7 @@ npm run start   # Chạy trên port 3000
 
 ---
 
+<a id="cơ-sở-dữ-liệu"></a>
 ## 🗄️ Cơ Sở Dữ Liệu
 
 MySQL. Dữ liệu website và database đồng bộ realtime qua Prisma ORM.
@@ -355,6 +374,7 @@ SELECT * FROM User;
 
 ---
 
+<a id="hệ-thống-xác-thực"></a>
 ## 🔐 Hệ Thống Xác Thực
 
 ### Luồng xác thực
@@ -402,6 +422,7 @@ UPDATE User SET active = 0 WHERE username = 'someuser';
 
 ---
 
+<a id="api-endpoints"></a>
 ## 🔌 API Endpoints
 
 ### Auth
@@ -426,7 +447,7 @@ UPDATE User SET active = 0 WHERE username = 'someuser';
 ### Vehicles
 | Method | Path | Mô tả |
 |--------|------|-------|
-| GET | `/api/vehicles` | Danh sách xe đang đỗ |
+| GET | `/api/vehicles` | Danh sách xe đang đỗ (public — không cần auth) |
 | POST | `/api/vehicles` | Thêm xe (Arduino: cần secret header, Web: cần session) |
 | DELETE | `/api/vehicles` | Xử lý xe ra (Arduino: cần secret header, Web: cần session) |
 
@@ -484,6 +505,7 @@ UPDATE User SET active = 0 WHERE username = 'someuser';
 
 ---
 
+<a id="arduino--hardware"></a>
 ## 🔧 Arduino & Hardware
 
 ### Kết nối phần cứng
@@ -550,6 +572,7 @@ curl -X POST http://localhost:3004/exit -H "Content-Type: application/json" -d '
 
 ---
 
+<a id="tính-năng-chính"></a>
 ## ✨ Tính Năng Chính
 
 ### Dashboard
@@ -600,6 +623,7 @@ curl -X POST http://localhost:3004/exit -H "Content-Type: application/json" -d '
 
 ---
 
+<a id="troubleshooting"></a>
 ## 🔧 Troubleshooting
 
 ### Arduino không kết nối được
@@ -645,6 +669,7 @@ npm run build
 
 ---
 
+<a id="backup--restore"></a>
 ## 💾 Backup & Restore Database
 
 ### Backup (Xuất dữ liệu)
@@ -680,6 +705,7 @@ crontab -e
 
 ---
 
+<a id="bảo-mật"></a>
 ## 🛡️ Bảo Mật
 
 ### Kiến trúc bảo vệ API
@@ -746,7 +772,18 @@ Các lệnh khác → trả 403 Forbidden.
 
 ---
 
+<a id="lich-su-cap-nhat"></a>
 ## 📝 Lịch Sử Cập Nhật
+
+### v0.4.5 — Repo Cleanup & Audit Fixes
+- **`.env.example`**: Tạo file mẫu biến môi trường đầy đủ — người mới clone repo chỉ cần `cp .env.example .env`
+- **`dotenv` dependency**: Thêm `dotenv` vào `package.json` (trước đó dùng ngầm qua bun.lock)
+- **Xóa `/mini-services/` dư thừa**: Thư mục root chứa bản cũ mini-services không còn được dùng, xóa khỏi git và filesystem
+- **`package.json` rename**: Đổi tên package từ `nextjs_tailwind_shadcn_ts` thành `smart-parking-tbu`
+- **`NEXT_PUBLIC_WS_URL` document**: Thêm biến env vào `.env.example` + README, giải thích cách deploy production
+- **DailyStats sync fix**: Sửa `update: {}` rỗng trong `/api/sync` — giờ refresh `studentCount`/`teacherCount` mỗi lần Arduino sync
+- **ActivityLog username**: Xe vào/ra qua Arduino giờ ghi `username: 'arduino'` thay vì rỗng — phân biệt được nguồn trigger
+- **API document**: GET `/api/vehicles` ghi rõ là public (không cần auth) — phù hợp intranet
 
 ### v0.4.4 — Security Audit & Code Quality
 - **Arduino API Secret**: Thêm `ARDUINO_API_SECRET` — POST/DELETE `/api/vehicles` và POST `/api/sync` yêu cầu header `X-Arduino-Secret`
