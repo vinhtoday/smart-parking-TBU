@@ -56,12 +56,6 @@ function Calendar({
         formatYearDropdown: (year) => `${year}`,
         ...formatters,
       }}
-      labels={{
-        nextMonth: () => "Tháng sau",
-        previousMonth: () => "Tháng trước",
-        nextYear: () => "Năm sau",
-        previousYear: () => "Năm trước",
-      }}
       classNames={{
         root: cn("w-fit", defaultClassNames.root),
         months: cn(

@@ -29,6 +29,7 @@ import type {
 } from '@/types/parking'
 import type { SocketAlarmData } from '@/types/arduino'
 
+import { APP_VERSION } from '@/lib/constants'
 import { useParkingData } from '@/hooks/useParkingData'
 import { useAlarmSound } from '@/hooks/useAlarmSound'
 import { useSocketIO } from '@/hooks/useSocketIO'
@@ -41,6 +42,7 @@ import HistoryTab from '@/components/tabs/HistoryTab'
 import ReportsTab from '@/components/tabs/ReportsTab'
 import SettingsTab from '@/components/tabs/SettingsTab'
 import ManageTab from '@/components/tabs/ManageTab'
+import ActivityLogsTab from '@/components/tabs/ActivityLogsTab'
 
 /* =============================================
    MAIN DASHBOARD COMPONENT
@@ -54,9 +56,10 @@ export default function ParkingDashboard() {
   const {
     stats, vehicles, students, teachers, config,
     history, historyTotal, historyPage, report, users,
+    activityLogs, logsTotal, logsOffset,
     lastSync, loading,
     fetchStats, fetchVehicles, fetchStudents, fetchTeachers,
-    fetchConfig, fetchHistory, fetchReport, fetchUsers,
+    fetchConfig, fetchHistory, fetchReport, fetchUsers, fetchActivityLogs,
     loadAll, refreshCore,
   } = useParkingData()
 
@@ -786,7 +789,15 @@ export default function ParkingDashboard() {
               <div className="text-2xl font-bold text-violet-700 dark:text-violet-400 animate-count-up">
                 {stats ? formatVND(stats.todayRevenue) : '0đ'}
               </div>
-              <p className="text-[10px] text-muted-foreground mt-1">{stats?.feePerTrip ?? 2000}đ/lượt</p>
+              <div className="flex items-center gap-3 mt-1">
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                  ↓ {stats?.todayEntries ?? 0} vào
+                </span>
+                <span className="text-[10px] text-red-500 dark:text-red-400 font-medium">
+                  ↑ {stats?.todayExits ?? 0} ra
+                </span>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{stats?.feePerTrip ?? 2000}đ/lượt</p>
             </CardContent>
           </Card>
         </div>
@@ -825,6 +836,11 @@ export default function ParkingDashboard() {
               <BarChart3 className="h-3.5 w-3.5" />
               <span>Báo cáo</span>
             </TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="activity-logs" className="text-xs gap-1.5">
+                <Activity className="h-3.5 w-3.5" />Nhật ký
+              </TabsTrigger>
+            )}
             {isAdmin && (
               <TabsTrigger value="settings" className="gap-1.5 text-xs sm:text-sm">
                 <Settings className="h-3.5 w-3.5" />
@@ -953,6 +969,18 @@ export default function ParkingDashboard() {
             />
           </TabsContent>
 
+          {/* ========== TAB: ACTIVITY LOGS ========== */}
+          {isAdmin && (
+          <TabsContent value="activity-logs">
+            <ActivityLogsTab
+              activityLogs={activityLogs}
+              logsTotal={logsTotal}
+              logsOffset={logsOffset}
+              fetchActivityLogs={fetchActivityLogs}
+            />
+          </TabsContent>
+          )}
+
           {/* ========== TAB: SETTINGS ========== */}
           {isAdmin && (
           <TabsContent value="settings">
@@ -982,7 +1010,7 @@ export default function ParkingDashboard() {
       {/* ============= FOOTER ============= */}
       <footer className="border-t mt-auto">
         <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-1 text-xs text-muted-foreground">
-          <p>{stats?.systemName || 'Bãi Đỗ Xe Thông Minh'} v2.1 — Trường đại học Thái Bình</p>
+          <p>{stats?.systemName || 'Bãi Đỗ Xe Thông Minh'} v{APP_VERSION} — Trường đại học Thái Bình</p>
           <p>
             {lastSync ? (
               <>Lần cập nhật cuối: {lastSync.toLocaleTimeString('vi-VN')}</>

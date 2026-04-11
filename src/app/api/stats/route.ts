@@ -23,7 +23,7 @@ export async function GET() {
     const parkedCount = parkedVehicles.length
     const studentCount = parkedVehicles.filter((v) => v.personType === 'student').length
     const teacherCount = parkedVehicles.filter((v) => v.personType === 'teacher').length
-    const maxSlots = config?.maxSlots ?? 4
+    const maxSlots = config?.maxSlots ?? 6
     const freeSlots = Math.max(0, maxSlots - parkedCount)
     const feePerTrip = config?.feePerTrip ?? 2000
     const isOpen = config?.isOpen ?? true

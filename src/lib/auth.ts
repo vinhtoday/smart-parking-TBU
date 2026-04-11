@@ -74,7 +74,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Log LOGIN activity
-        try { await db.activityLog.create({ data: { action: 'LOGIN', details: 'Đăng nhập thành công', username: user.username } }) } catch {}
+        try { await db.activityLog.create({ data: { action: 'LOGIN', details: 'Đăng nhập thành công', username: user.username } }) } catch { /* non-critical: activity log best-effort */ }
 
         // Trả về user object cho session
         return {

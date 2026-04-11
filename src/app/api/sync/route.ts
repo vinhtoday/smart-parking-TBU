@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { parkedVehicles, parkedCount, studentCount, teacherCount } = body
+    const { parkedVehicles, studentCount, teacherCount } = body
 
     if (!parkedVehicles || !Array.isArray(parkedVehicles)) {
       return NextResponse.json(

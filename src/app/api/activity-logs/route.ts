@@ -8,8 +8,11 @@ const ALLOWED_ACTIONS = [
   'VEHICLE_ENTRY', 'VEHICLE_EXIT', 'VEHICLE_DELETE',
   'CONFIG_UPDATE',
   'USER_CREATE', 'USER_UPDATE', 'USER_DELETE',
-  'STUDENT_CREATE', 'STUDENT_UPDATE', 'STUDENT_DELETE',
-  'TEACHER_CREATE', 'TEACHER_UPDATE', 'TEACHER_DELETE',
+  'STUDENT_ADD', 'STUDENT_UPDATE', 'STUDENT_DELETE',
+  'STUDENT_CREATE',
+  'TEACHER_ADD', 'TEACHER_UPDATE', 'TEACHER_DELETE',
+  'TEACHER_CREATE', 'TEACHER_VIP_TOGGLE',
+  'SEED',
 ] as const
 
 // GET - List activity logs
@@ -23,14 +26,21 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const limit = Math.min(parseInt(searchParams.get('limit') || '50') || 50, 500)
     const offset = Math.max(parseInt(searchParams.get('offset') || '0') || 0, 0)
+    const actionFilter = searchParams.get('action') || ''
 
-    const logs = await db.activityLog.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: limit,
-      skip: offset,
-    })
+    const where = actionFilter ? { action: actionFilter } : {}
 
-    return NextResponse.json({ success: true, data: logs })
+    const [logs, total] = await Promise.all([
+      db.activityLog.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
+      }),
+      db.activityLog.count({ where }),
+    ])
+
+    return NextResponse.json({ success: true, data: { logs, total } })
   } catch (error: unknown) {
     console.error('Error fetching activity logs:', error)
     return NextResponse.json(

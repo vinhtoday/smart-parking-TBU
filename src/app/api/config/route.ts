@@ -70,7 +70,7 @@ export async function PUT(request: NextRequest) {
       await db.activityLog.create({
         data: { action: 'CONFIG_UPDATE', details: `Cập nhật cấu hình: feePerTrip=${config.feePerTrip}` },
       })
-    } catch {}
+    } catch { /* non-critical: activity log best-effort */ }
 
     return NextResponse.json({
       success: true,

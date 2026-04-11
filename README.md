@@ -124,8 +124,10 @@ my-project/
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx             # Root layout + SessionProvider
-│   │   ├── page.tsx               # Main dashboard (7 tabs)
+│   │   ├── page.tsx               # Main dashboard (8 tabs)
 │   │   ├── login/page.tsx         # Trang đăng nhập + CAPTCHA
+│   │   ├── error.tsx              # Error boundary (try again)
+│   │   ├── not-found.tsx          # 404 page
 │   │   ├── theme-provider.tsx     # Dark/Light theme config
 │   │   └── api/
 │   │       ├── auth/[...nextauth]/route.ts  # NextAuth API
@@ -244,7 +246,7 @@ Mở trình duyệt: **http://localhost:3000**
 
 | Username | Password | Quyền (admin) | Mô tả |
 |----------|----------|---------------|--------|
-| `admin` | `admin123` | 1 (Toàn quyền) | Xem tất cả 7 tab, chỉnh cấu hình, quản lý user |
+| `admin` | `admin123` | 1 (Toàn quyền) | Xem tất cả 8 tab, chỉnh cấu hình, quản lý user |
 | `nhanvien` | `nv123456` | 0 (Giới hạn) | Chỉ xem Tổng quan, Lịch sử, Báo cáo |
 
 > ⚠️ **Đổi mật khẩu ngay sau lần đăng nhập đầu tiên!** Seed chỉ chạy trong development (`NODE_ENV ≠ production`).
@@ -576,7 +578,7 @@ curl -X POST http://localhost:3004/exit -H "Content-Type: application/json" -d '
 ## ✨ Tính Năng Chính
 
 ### Dashboard
-- **7 tab**: Tổng quan, Sinh viên, Giảng viên, Tài khoản, Lịch sử, Báo cáo, Cấu hình
+- **8 tab**: Tổng quan, Sinh viên, Giảng viên, Tài khoản, Lịch sử, Báo cáo, Nhật ký, Cấu hình
 - **5 card thống kê**: Xe đang gửi, Sinh viên, Giảng viên, RFID gần nhất, Thu nhập
 - **Dark/Light mode**: Tự động theo hệ thống hoặc toggle thủ công
 - **Responsive**: Desktop, tablet, mobile
@@ -774,6 +776,37 @@ Các lệnh khác → trả 403 Forbidden.
 
 <a id="lich-su-cap-nhat"></a>
 ## 📝 Lịch Sử Cập Nhật
+
+### v0.5.0 — Activity Logs Tab & Code Quality
+
+**🔴 TypeScript fixes (3 errors → 0):**
+- **`format.ts` ExcelJS namespace**: Thêm `import type ExcelJS from 'exceljs'` để TypeScript nhận diện namespace `ExcelJS.Borders` cho `Partial<ExcelJS.Borders>` type annotation
+- **`calendar.tsx` labels prop**: Xóa `nextMonth`/`previousMonth`/`nextYear`/`previousYear` không tồn tại trong react-day-picker v9 — v9 dùng `labelNext`/`labelPrevious` cho accessibility, navigation handled bởi custom Chevron component
+- **`ReportsTab.tsx` Recharts formatter**: Fix type mismatch — `Formatter<ValueType, NameType>` cho phép `value` là `ValueType` (generic), dùng type inference thay vì hardcode `number`
+
+**🟢 Features:**
+- **Tab Nhật ký hoạt động (ActivityLogsTab)**: Tab mới cho admin — xem toàn bộ nhật ký hệ thống trực tiếp trên web dashboard
+- **Lọc theo loại hành động**: Dropdown 18 loại action (xé vào/ra, CRUD SV/GV/User, VIP, cấu hình, đăng nhập...)
+- **Phân trang**: 30 bản ghi/trang, next/prev buttons
+- **Icon + badge màu phân biệt**: Mỗi nhóm action có icon và badge màu riêng (xe=xanh lá, SV=xanh dương, GV=vàng, user=xanh, config=tím, login=xanh lá, logout=đỏ)
+- **Username `arduino` highlight**: Log từ Arduino hiển thị màu xanh lá để phân biệt với user thường
+- **Dashboard 8 tab**: Cập nhật từ 7 → 8 tabs
+- **`GET /api/health`**: Endpoint health check public — trả `{ status: 'ok', timestamp, version }`
+- **`error.tsx`**: Error boundary — trang lỗi với thông báo + nút "Thử lại"
+- **`not-found.tsx`**: Custom 404 page — trang không tìm thấy với link về trang chủ
+- **Lượt vào/ra hôm nay**: Card thống kê RFID hiển thị thêm todayEntries/todayExits
+
+**🟡 Code quality:**
+- **Footer version dynamic**: `v2.1` hardcoded → `v{APP_VERSION}` từ `constants.ts` (single source of truth)
+- **`stats/route.ts` maxSlots fallback**: `4` → `6` (khớp Arduino `MAX_SLOTS=6` và seed data)
+- **`sync/route.ts` unused destructuring**: Xóa `parkedCount` không sử dụng
+- **Empty catch blocks**: Thêm comment `/* non-critical: activity log best-effort */` vào 13 chỗ
+- **Unused vars**: Prefix `_` cho `req`, `ci`, `options` params; xóa `ACCENT_BG` constant không dùng
+- **`package.json` start script**: `bun` → `node` (standalone Next.js nên chạy bằng node)
+- **ESLint ignore**: Thêm `src/mini-services/**` (JS files, không cần TS linting)
+- **`activity-logs` API**: Hỗ trợ filter theo `action` query param, trả `{ logs[], total }` với parallel count query
+- **`useParkingData` hook**: Thêm `fetchActivityLogs`, `activityLogs`, `logsTotal`, `logsOffset`
+- **Version bump** `0.4.5` → `0.5.0`
 
 ### v0.4.5 — Repo Cleanup & Audit Fixes
 - **`.env.example`**: Tạo file mẫu biến môi trường đầy đủ — người mới clone repo chỉ cần `cp .env.example .env`

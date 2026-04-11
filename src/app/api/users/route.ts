@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       await db.activityLog.create({
         data: { action: 'USER_CREATE', details: `Tạo tài khoản: ${username} (${name})`, username },
       })
-    } catch {}
+    } catch { /* non-critical: activity log best-effort */ }
 
     return NextResponse.json({ success: true, data: user })
   } catch (error: unknown) {
@@ -198,7 +198,7 @@ export async function PUT(request: NextRequest) {
       await db.activityLog.create({
         data: { action: 'USER_UPDATE', details: `Cập nhật tài khoản: ${user.username}`, username: user.username },
       })
-    } catch {}
+    } catch { /* non-critical: activity log best-effort */ }
 
     return NextResponse.json({ success: true, data: user })
   } catch (error: unknown) {
@@ -261,7 +261,7 @@ export async function DELETE(request: NextRequest) {
       await db.activityLog.create({
         data: { action: 'USER_DELETE', details: `Xóa tài khoản: ${user.username} (${user.name})`, username: auth.user.username },
       })
-    } catch {}
+    } catch { /* non-critical: activity log best-effort */ }
 
     return NextResponse.json({ success: true, data: { message: `Đã xóa tài khoản ${user.username}` } })
   } catch (error: unknown) {

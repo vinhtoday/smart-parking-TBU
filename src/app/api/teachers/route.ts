@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       await db.activityLog.create({
         data: { action: 'TEACHER_ADD', details: `Thêm giảng viên: ${name} (${cleanRfidUid})` },
       })
-    } catch {}
+    } catch { /* non-critical: activity log best-effort */ }
 
     return NextResponse.json({ success: true, data: teacher })
   } catch (error: unknown) {
@@ -163,7 +163,7 @@ export async function PUT(request: NextRequest) {
       await db.activityLog.create({
         data: { action: 'TEACHER_UPDATE', details: `Sửa giảng viên: ${teacher.name} (${teacher.rfidUid})` },
       })
-    } catch {}
+    } catch { /* non-critical: activity log best-effort */ }
 
     return NextResponse.json({ success: true, data: teacher })
   } catch (error: unknown) {
@@ -230,7 +230,7 @@ export async function DELETE(request: NextRequest) {
       await db.activityLog.create({
         data: { action: 'TEACHER_DELETE', details: `Xóa giảng viên: ${teacher?.name || id}` },
       })
-    } catch {}
+    } catch { /* non-critical: activity log best-effort */ }
 
     return NextResponse.json({ success: true, message: 'Đã xóa giảng viên thành công' })
   } catch (error: unknown) {

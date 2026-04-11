@@ -19,6 +19,9 @@ export function useParkingData() {
   const [historyPage, setHistoryPage] = useState(1)
   const [report, setReport] = useState<ReportData | null>(null)
   const [users, setUsers] = useState<Array<{ id: string; username: string; name: string; admin: number; active: boolean; createdAt: string }>>([])
+  const [activityLogs, setActivityLogs] = useState<Array<{ id: string; action: string; details: string; username: string; createdAt: string }>>([])
+  const [logsTotal, setLogsTotal] = useState(0)
+  const [logsOffset, setLogsOffset] = useState(0)
   const [lastSync, setLastSync] = useState<Date | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -119,15 +122,32 @@ export function useParkingData() {
     }
   }, [])
 
+  const fetchActivityLogs = useCallback(async (limit = 30, offset = 0, actionFilter = '') => {
+    try {
+      const params = new URLSearchParams({ limit: String(limit), offset: String(offset) })
+      if (actionFilter) params.set('action', actionFilter)
+      const res = await fetch(`/api/activity-logs?${params}`)
+      const json = await res.json()
+      if (json.success) {
+        setActivityLogs(json.data.logs)
+        setLogsTotal(json.data.total)
+        setLogsOffset(offset)
+      }
+    } catch (e) {
+      console.error('Failed to fetch activity logs:', e)
+    }
+  }, [])
+
   // === Composed Loaders ===
   const loadAll = useCallback(async () => {
     setLoading(true)
     await Promise.all([
       fetchStats(), fetchVehicles(), fetchStudents(), fetchTeachers(),
       fetchConfig(), fetchHistory(1, ''), fetchReport(), fetchUsers(),
+      fetchActivityLogs(),
     ])
     setLoading(false)
-  }, [fetchStats, fetchVehicles, fetchStudents, fetchTeachers, fetchConfig, fetchHistory, fetchReport, fetchUsers])
+  }, [fetchStats, fetchVehicles, fetchStudents, fetchTeachers, fetchConfig, fetchHistory, fetchReport, fetchUsers, fetchActivityLogs])
 
   // Refresh core data (stats + vehicles) — used by Socket.IO events
   const refreshCore = useCallback(() => {
@@ -154,10 +174,11 @@ export function useParkingData() {
     history, setHistory, historyTotal, historyPage,
     report, setReport,
     users, setUsers,
+    activityLogs, logsTotal, logsOffset,
     lastSync,
     loading,
     fetchStats, fetchVehicles, fetchStudents, fetchTeachers,
-    fetchConfig, fetchHistory, fetchReport, fetchUsers,
+    fetchConfig, fetchHistory, fetchReport, fetchUsers, fetchActivityLogs,
     loadAll, refreshCore, refreshAll,
   }
 }

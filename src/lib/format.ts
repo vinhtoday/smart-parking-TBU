@@ -1,3 +1,5 @@
+import type ExcelJS from 'exceljs'
+
 // Utility functions for formatting in the Smart Parking System
 
 /**
@@ -142,7 +144,7 @@ export function downloadPDF(filename: string, title: string, headers: string[], 
 <table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>
 ${allRows.slice(1).map((row, i) => {
   const isTotal = options?.totalRow && i === allRows.length - 2
-  return `<tr class="${isTotal ? 'total-row' : ''}">${row.map((cell, ci) => 
+  return `<tr class="${isTotal ? 'total-row' : ''}">${row.map((cell, _ci) => 
     `<td class="${typeof cell === 'number' ? 'text-right' : ''}">${cell != null ? cell : ''}</td>`
   ).join('')}</tr>`
 }).join('')}
@@ -168,7 +170,8 @@ export async function downloadExcel(
   options?: { totalRow?: (string | number | null)[] }
 ) {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const ExcelJS = require('exceljs')
+  const ExcelJSModule = require('exceljs')
+  const ExcelJS = ExcelJSModule.default || ExcelJSModule
 
   const workbook = new ExcelJS.Workbook()
   const sheet = workbook.addWorksheet('Dữ liệu', {
@@ -183,7 +186,6 @@ export async function downloadExcel(
   const TOTAL_ROW_BG = 'FFEDF2F7'
   const BORDER_COLOR = 'FFCBD5E0'
   const TOTAL_BORDER_COLOR = 'FFA0AEC0'
-  const ACCENT_BG = 'FFEBF8FF'
 
   const thinBorder: Partial<ExcelJS.Borders> = {
     top: { style: 'thin', color: { argb: BORDER_COLOR } },

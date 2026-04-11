@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
       await db.activityLog.create({
         data: { action: 'VEHICLE_ENTRY', details: `Xe vào: ${realName} (${rfidUid}) - Loại: ${realType}${realVip ? ' VIP' : ''}`, username: source },
       })
-    } catch {}
+    } catch { /* non-critical: activity log best-effort */ }
 
     // Update daily stats
     const today = todayStr()
@@ -246,7 +246,7 @@ export async function DELETE(request: NextRequest) {
       await db.activityLog.create({
         data: { action: 'VEHICLE_EXIT', details: `Xe ra: ${vehicle.personName} (${rfidUid}) - ${duration}s - Phí: ${fee}đ`, username: exitSource },
       })
-    } catch {}
+    } catch { /* non-critical: activity log best-effort */ }
 
     // Notify Arduino Serial Bridge immediately — tell Arduino to open barrier
     try {

@@ -284,7 +284,7 @@ export default function ReportsTab({
                             border: '1px solid oklch(0.8 0 0 / 15%)',
                             boxShadow: '0 10px 25px -5px oklch(0 0 0 / 12%), 0 4px 6px -2px oklch(0 0 0 / 8%)',
                           }}
-                          formatter={(value: number, name: string) => [`${value} người`, name]}
+                          formatter={(value, name) => [`${value} người`, name]}
                         />
                       </PieChart>
                     </ResponsiveContainer>

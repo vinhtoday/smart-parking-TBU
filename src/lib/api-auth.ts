@@ -18,7 +18,7 @@ export function verifyArduinoSecret(request: NextRequest): boolean {
  * Get the current session from the request.
  * Returns null if not authenticated.
  */
-export async function getSession(req?: NextRequest) {
+export async function getSession(_req?: NextRequest) {
   const session = await getServerSession(authOptions)
   return session
 }
