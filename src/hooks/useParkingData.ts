@@ -7,17 +7,12 @@ import type {
   ReportData, ParkingConfig,
 } from '@/types/parking'
 
-export interface GuestData {
-  parkedGuests: ParkedVehicle[]
-  todayHistory: HistoryRecord[]
-  feePerTrip: number
-  stats: {
-    currentlyParked: number
-    todayEntries: number
-    todayExits: number
-    todayRevenue: number
-    uniqueGuestsToday: number
-  }
+export interface GuestRecord {
+  rfidUid: string
+  visitCount: number
+  totalFee: number
+  lastEntry: string | null
+  isParked: boolean
 }
 
 export function useParkingData() {
@@ -37,7 +32,7 @@ export function useParkingData() {
   const [logsOffset, setLogsOffset] = useState(0)
   const [lastSync, setLastSync] = useState<Date | null>(null)
   const [loading, setLoading] = useState(true)
-  const [guestData, setGuestData] = useState<GuestData | null>(null)
+  const [guestData, setGuestData] = useState<GuestRecord[]>([])
 
   // === Fetch Functions ===
   const fetchStats = useCallback(async () => {

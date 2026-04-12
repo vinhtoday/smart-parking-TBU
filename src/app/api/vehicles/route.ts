@@ -75,8 +75,8 @@ export async function POST(request: NextRequest) {
     }
 
     // DB lookup found nothing → always guest
-    // DO NOT trust personType from client/Arduino — only DB lookup is authoritative
-    if (!realName) realName = personName || 'Khách'
+    // DO NOT trust personType/name from client/Arduino — only DB lookup is authoritative
+    if (!realName) realName = 'Khách'
     if (!realType) realType = 'guest'
     if (!realVip) realVip = false
 

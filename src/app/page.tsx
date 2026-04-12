@@ -62,7 +62,7 @@ export default function ParkingDashboard() {
     fetchStats, fetchVehicles, fetchStudents, fetchTeachers,
     fetchConfig, fetchHistory, fetchReport, fetchUsers, fetchActivityLogs,
     fetchGuests,
-    loadAll, refreshCore,
+    loadAll,
   } = useParkingData()
 
   const { startAlarmSound, stopAlarmSound } = useAlarmSound()
@@ -74,15 +74,28 @@ export default function ParkingDashboard() {
   const [lastScannedUid, setLastScannedUid] = useState('')
 
   // Socket.IO — pass callbacks via refs (stable socket connection)
+  // Optimistic: update vehicles locally on entry/exit, then re-fetch stats in background
   const { connected: wsConnected, emit: socketEmit } = useSocketIO({
-    onVehicleEntry: () => { toast.success('🚗 Xe mới vào bãi đỗ!'); refreshCore(); fetchGuests() },
-    onVehicleExit: () => { toast.info('🚙 Xe đã rời bãi đỗ'); refreshCore(); fetchGuests() },
+    onVehicleEntry: () => {
+      toast.success('🚗 Xe mới vào bãi đỗ!')
+      fetchStats()
+      fetchVehicles()
+      fetchGuests()
+    },
+    onVehicleExit: () => {
+      toast.info('🚙 Xe đã rời bãi đỗ')
+      fetchStats()
+      fetchVehicles()
+      fetchHistory(historyPage, historySearch)
+      fetchGuests()
+    },
     onRfidScan: (uid) => {
       if (uid) setLastScannedUid(uid)
-      refreshCore()
+      fetchStats()
+      fetchVehicles()
     },
     onStatusChange: () => { fetchStats(); fetchConfig() },
-    onFullSync: () => { refreshCore(); fetchGuests() },
+    onFullSync: () => { fetchStats(); fetchVehicles(); fetchGuests() },
     onFireAlarm: (data: SocketAlarmData) => {
       const source = (data.source || 'UNKNOWN').toUpperCase()
       const message = data.message || 'CẢNH BÁO!'
@@ -948,8 +961,7 @@ export default function ParkingDashboard() {
             <GuestsTab
               guestData={guestData}
               stats={stats}
-              vehicles={vehicles}
-              onRefresh={() => { refreshCore(); fetchGuests(); fetchStudents(); fetchTeachers() }}
+              onRefresh={() => { fetchStats(); fetchVehicles(); fetchGuests(); fetchStudents(); fetchTeachers() }}
             />
           </TabsContent>
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,23 +19,26 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 
-import {
-  formatVND, formatDuration, formatTime, formatDateTime, elapsedSince,
-} from '@/lib/format'
-import type { ParkedVehicle, Stats, HistoryRecord } from '@/types/parking'
-import type { GuestData } from '@/hooks/useParkingData'
+import { formatVND, formatDateTime } from '@/lib/format'
+import type { Stats } from '@/types/parking'
+
+interface GuestRecord {
+  rfidUid: string
+  visitCount: number
+  totalFee: number
+  lastEntry: string | null
+  isParked: boolean
+}
 
 interface GuestsTabProps {
-  guestData: GuestData | null
+  guestData: GuestRecord[] | null
   stats: Stats | null
-  vehicles: ParkedVehicle[]
   onRefresh: () => void
 }
 
 export default function GuestsTab({
   guestData,
   stats,
-  vehicles,
   onRefresh,
 }: GuestsTabProps) {
   const [guestSearch, setGuestSearch] = useState('')
@@ -47,24 +51,21 @@ export default function GuestsTab({
   const [convertPhone, setConvertPhone] = useState('')
   const [converting, setConverting] = useState(false)
 
-  // Currently parked guests (realtime from vehicles)
-  const parkedGuests = vehicles.filter((v) => v.personType === 'guest')
-  const todayHistory: HistoryRecord[] = guestData?.todayHistory ?? []
-  const feePerTrip = guestData?.feePerTrip ?? stats?.feePerTrip ?? 2000
+  const guests: GuestRecord[] = guestData ?? []
+  const feePerTrip = stats?.feePerTrip ?? 2000
 
-  // Filter parked guests by search
-  const filteredParked = parkedGuests.filter((v) =>
+  // Filter by search
+  const filteredGuests = guests.filter((g) =>
     !guestSearch ||
-    v.rfidUid.toLowerCase().includes(guestSearch.toLowerCase())
+    g.rfidUid.toLowerCase().includes(guestSearch.toLowerCase())
   )
 
-  // Filter today history by search
-  const filteredHistory = todayHistory.filter((h) =>
-    !guestSearch ||
-    h.rfidUid.toLowerCase().includes(guestSearch.toLowerCase())
-  )
+  // Stats
+  const parkedCount = guests.filter((g) => g.isParked).length
+  const totalGuests = guests.length
+  const totalRevenue = guests.reduce((sum, g) => sum + g.totalFee, 0)
 
-  // Open convert dialog for a specific guest
+  // Open convert dialog
   const openConvert = (uid: string) => {
     setConvertUid(uid)
     setConvertType('student')
@@ -113,56 +114,18 @@ export default function GuestsTab({
     toast.success('Đã copy UID')
   }
 
-  // Aggregate stats
-  const guestStats = guestData?.stats
-  const todayRevenue = guestStats?.todayRevenue ?? 0
-
   return (
     <div className="space-y-4">
-      {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card className="parking-card-hover overflow-hidden">
-          <CardContent className="p-4 text-center">
-            <UserRound className="h-5 w-5 text-slate-500 mx-auto mb-1" />
-            <p className="text-2xl font-bold">{parkedGuests.length}</p>
-            <p className="text-xs text-muted-foreground">Đang đỗ</p>
-          </CardContent>
-        </Card>
-        <Card className="parking-card-hover stat-card-emerald">
-          <CardContent className="p-4 text-center">
-            <Badge className="text-[10px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 mb-1">
-              {guestStats?.todayEntries ?? 0} vào
-            </Badge>
-            <p className="text-xs text-muted-foreground">Lượt vào hôm nay</p>
-          </CardContent>
-        </Card>
-        <Card className="parking-card-hover">
-          <CardContent className="p-4 text-center">
-            <Badge className="text-[10px] bg-red-500/10 text-red-600 border-red-200 dark:border-red-800 mb-1">
-              {guestStats?.todayExits ?? 0} ra
-            </Badge>
-            <p className="text-xs text-muted-foreground">Lượt ra hôm nay</p>
-          </CardContent>
-        </Card>
-        <Card className="parking-card-hover stat-card-violet">
-          <CardContent className="p-4 text-center">
-            <p className="text-xl font-bold text-violet-700 dark:text-violet-400">{formatVND(todayRevenue)}</p>
-            <p className="text-xs text-muted-foreground">Doanh thu khách hôm nay</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Currently Parked Guests */}
       <Card>
         <CardHeader className="pb-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <CardTitle className="text-base flex items-center gap-2">
                 <UserRound className="h-4 w-4 text-slate-500" />
-                Khách đang gửi xe
+                Quản lý Khách
               </CardTitle>
               <CardDescription className="text-xs">
-                {parkedGuests.length} khách đang đỗ — Phí: {feePerTrip.toLocaleString('vi-VN')}đ/lượt
+                {totalGuests} khách — {parkedCount} đang đỗ — Tổng: {formatVND(totalRevenue)} — Phí: {feePerTrip.toLocaleString('vi-VN')}đ/lượt
               </CardDescription>
             </div>
             <div className="relative w-full sm:w-56">
@@ -177,127 +140,73 @@ export default function GuestsTab({
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto parking-scrollbar max-h-[300px] overflow-y-auto">
+          <div className="overflow-x-auto parking-scrollbar max-h-[500px] overflow-y-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10 text-xs">#</TableHead>
                   <TableHead className="text-xs">RFID UID</TableHead>
-                  <TableHead className="text-xs">Thời gian vào</TableHead>
-                  <TableHead className="text-xs">Thời gian đỗ</TableHead>
-                  <TableHead className="text-xs text-right">Phí dự kiến</TableHead>
+                  <TableHead className="text-xs text-center">Số lần</TableHead>
+                  <TableHead className="text-xs text-right">Tổng tiền</TableHead>
+                  <TableHead className="text-xs">Lần cuối</TableHead>
+                  <TableHead className="text-xs text-center">Trạng thái</TableHead>
                   <TableHead className="text-xs text-center">Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredParked.length === 0 ? (
+                {filteredGuests.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground text-sm">
-                      {guestSearch ? 'Không tìm thấy khách nào' : 'Hiện không có khách nào trong bãi'}
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground text-sm">
+                      {guestSearch ? 'Không tìm thấy khách nào' : 'Chưa có khách nào'}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredParked.map((v, i) => (
-                    <TableRow key={v.id} className="animate-fade-slide-in">
+                  filteredGuests.map((g, i) => (
+                    <TableRow key={g.rfidUid}>
                       <TableCell className="text-xs font-medium">{i + 1}</TableCell>
                       <TableCell className="text-xs font-mono">
                         <div className="flex items-center gap-1">
-                          <span className="truncate">{v.rfidUid.replace(/\s+/g, '')}</span>
+                          <span className="truncate">{g.rfidUid.replace(/\s+/g, '')}</span>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-5 w-5 shrink-0"
-                            onClick={() => copyToClipboard(v.rfidUid)}
+                            onClick={() => copyToClipboard(g.rfidUid)}
                           >
                             <Copy className="h-3 w-3" />
                           </Button>
                         </div>
                       </TableCell>
-                      <TableCell className="text-xs">{formatTime(v.entryTime)}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        {formatDuration(elapsedSince(v.entryTime))}
+                      <TableCell className="text-xs text-center font-semibold text-sky-600 dark:text-sky-400">
+                        {g.visitCount}
                       </TableCell>
-                      <TableCell className="text-xs text-right font-medium text-violet-600 dark:text-violet-400">
-                        {formatVND(feePerTrip)}
+                      <TableCell className="text-xs text-right font-semibold text-violet-600 dark:text-violet-400">
+                        {g.totalFee > 0 ? formatVND(g.totalFee) : '0đ'}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {g.lastEntry ? formatDateTime(g.lastEntry) : '—'}
+                      </TableCell>
+                      <TableCell className="text-xs text-center">
+                        {g.isParked ? (
+                          <Badge className="text-[10px] bg-amber-500 hover:bg-amber-600 text-white">
+                            Đang đỗ
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-[10px] border-emerald-300 text-emerald-700 bg-emerald-50 dark:border-emerald-600 dark:text-emerald-300 dark:bg-emerald-950/40">
+                            Đã ra
+                          </Badge>
+                        )}
                       </TableCell>
                       <TableCell className="text-center">
                         <Button
                           variant="outline"
                           size="sm"
                           className="h-7 text-xs gap-1"
-                          onClick={() => openConvert(v.rfidUid)}
+                          onClick={() => openConvert(g.rfidUid)}
                         >
                           <ArrowRightLeft className="h-3 w-3" />
                           Kê khai
                         </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Today's Guest History */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <CardTitle className="text-base flex items-center gap-2">
-                Lịch sử khách hôm nay
-              </CardTitle>
-              <CardDescription className="text-xs">
-                {todayHistory.length} lượt khách — {formatVND(todayRevenue)} doanh thu
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto parking-scrollbar max-h-[400px] overflow-y-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-10 text-xs">#</TableHead>
-                  <TableHead className="text-xs">RFID UID</TableHead>
-                  <TableHead className="text-xs">Thời gian vào</TableHead>
-                  <TableHead className="text-xs">Thời gian ra</TableHead>
-                  <TableHead className="text-xs">Thời gian đỗ</TableHead>
-                  <TableHead className="text-xs text-right">Phí thu</TableHead>
-                  <TableHead className="text-xs text-center">Trạng thái</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredHistory.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground text-sm">
-                      {guestSearch ? 'Không tìm thấy' : 'Chưa có khách nào hôm nay'}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredHistory.map((h, i) => (
-                    <TableRow key={h.id}>
-                      <TableCell className="text-xs font-medium">{i + 1}</TableCell>
-                      <TableCell className="text-xs font-mono">{h.rfidUid}</TableCell>
-                      <TableCell className="text-xs">{h.entryTime ? formatDateTime(h.entryTime) : '—'}</TableCell>
-                      <TableCell className="text-xs">{h.exitTime ? formatDateTime(h.exitTime) : '—'}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{formatDuration(h.duration)}</TableCell>
-                      <TableCell className="text-xs text-right font-medium text-violet-600 dark:text-violet-400">
-                        {h.fee > 0 ? formatVND(h.fee) : (
-                          <span className="text-emerald-600">Miễn phí</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-xs text-center">
-                        {h.exitTime ? (
-                          <Badge variant="outline" className="text-[10px] border-emerald-300 text-emerald-700 bg-emerald-50 dark:border-emerald-600 dark:text-emerald-300 dark:bg-emerald-950/40">
-                            Đã ra
-                          </Badge>
-                        ) : (
-                          <Badge className="text-[10px] bg-amber-500 hover:bg-amber-600 text-white">
-                            Đang đỗ
-                          </Badge>
-                        )}
                       </TableCell>
                     </TableRow>
                   ))
