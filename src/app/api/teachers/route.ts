@@ -97,6 +97,18 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // If this RFID was parked as guest, upgrade to teacher
+    try {
+      const parkedGuest = await db.parkedVehicle.findUnique({ where: { rfidUid: cleanRfidUid } })
+      if (parkedGuest && parkedGuest.personType === 'guest') {
+        const teacherVip = isVip !== undefined ? isVip : true
+        await db.parkedVehicle.update({
+          where: { rfidUid: cleanRfidUid },
+          data: { personName: name, personType: 'teacher', isVip: teacherVip },
+        })
+      }
+    } catch { /* non-critical: guest→teacher upgrade best-effort */ }
+
     // Log TEACHER_ADD activity
     try {
       await db.activityLog.create({

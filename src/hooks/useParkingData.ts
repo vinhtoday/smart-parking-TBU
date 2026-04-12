@@ -7,6 +7,19 @@ import type {
   ReportData, ParkingConfig,
 } from '@/types/parking'
 
+export interface GuestData {
+  parkedGuests: ParkedVehicle[]
+  todayHistory: HistoryRecord[]
+  feePerTrip: number
+  stats: {
+    currentlyParked: number
+    todayEntries: number
+    todayExits: number
+    todayRevenue: number
+    uniqueGuestsToday: number
+  }
+}
+
 export function useParkingData() {
   // === Core State ===
   const [stats, setStats] = useState<Stats | null>(null)
@@ -24,6 +37,7 @@ export function useParkingData() {
   const [logsOffset, setLogsOffset] = useState(0)
   const [lastSync, setLastSync] = useState<Date | null>(null)
   const [loading, setLoading] = useState(true)
+  const [guestData, setGuestData] = useState<GuestData | null>(null)
 
   // === Fetch Functions ===
   const fetchStats = useCallback(async () => {
@@ -138,16 +152,26 @@ export function useParkingData() {
     }
   }, [])
 
+  const fetchGuests = useCallback(async () => {
+    try {
+      const res = await fetch('/api/guests')
+      const json = await res.json()
+      if (json.success) setGuestData(json.data)
+    } catch (e) {
+      console.error('Failed to fetch guests:', e)
+    }
+  }, [])
+
   // === Composed Loaders ===
   const loadAll = useCallback(async () => {
     setLoading(true)
     await Promise.all([
       fetchStats(), fetchVehicles(), fetchStudents(), fetchTeachers(),
       fetchConfig(), fetchHistory(1, ''), fetchReport(), fetchUsers(),
-      fetchActivityLogs(),
+      fetchActivityLogs(), fetchGuests(),
     ])
     setLoading(false)
-  }, [fetchStats, fetchVehicles, fetchStudents, fetchTeachers, fetchConfig, fetchHistory, fetchReport, fetchUsers, fetchActivityLogs])
+  }, [fetchStats, fetchVehicles, fetchStudents, fetchTeachers, fetchConfig, fetchHistory, fetchReport, fetchUsers, fetchActivityLogs, fetchGuests])
 
   // Refresh core data (stats + vehicles) — used by Socket.IO events
   const refreshCore = useCallback(() => {
@@ -177,8 +201,10 @@ export function useParkingData() {
     activityLogs, logsTotal, logsOffset,
     lastSync,
     loading,
+    guestData,
     fetchStats, fetchVehicles, fetchStudents, fetchTeachers,
     fetchConfig, fetchHistory, fetchReport, fetchUsers, fetchActivityLogs,
+    fetchGuests,
     loadAll, refreshCore, refreshAll,
   }
 }

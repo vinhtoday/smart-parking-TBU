@@ -203,16 +203,14 @@ export default function OverviewTab({
                       </TableCell>
                       <TableCell><PersonTypeBadge personType={v.personType} /></TableCell>
                       <TableCell>
-                        {!v.personType || v.personType === 'guest' ? (<span className="text-[10px] text-muted-foreground">—</span>) : v.isVip ? (<VipBadge />) : (<span className="text-[10px] text-muted-foreground">—</span>)}
+                        {v.isVip ? (<VipBadge />) : (<span className="text-[10px] text-muted-foreground">—</span>)}
                       </TableCell>
                       <TableCell className="text-xs">{formatTime(v.entryTime)}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">
                         {formatDuration(elapsedSince(v.entryTime))}
                       </TableCell>
                       <TableCell className="text-xs text-right font-medium">
-                        {v.personType === 'guest' ? (
-                          <span className="text-emerald-600">Miễn phí</span>
-                        ) : v.isVip ? (
+                        {v.isVip ? (
                           <span className="text-emerald-600">Miễn phí</span>
                         ) : (
                           <span>{stats ? formatVND(stats.feePerTrip) : '2.000đ'}</span>

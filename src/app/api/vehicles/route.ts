@@ -194,11 +194,10 @@ export async function DELETE(request: NextRequest) {
       (now.getTime() - vehicle.entryTime.getTime()) / 1000
     )
 
-    // Calculate fee: free for VIP and guest, otherwise feePerTrip
+    // Calculate fee: free for VIP only, everyone else (including guest) pays feePerTrip
     const config = await db.parkingConfig.findUnique({ where: { id: 'default' } })
     const feePerTrip = config?.feePerTrip ?? 2000
-    const isGuest = vehicle.personType === 'guest'
-    const fee = (vehicle.isVip || isGuest) ? 0 : feePerTrip
+    const fee = vehicle.isVip ? 0 : feePerTrip
 
     // Wrap exit in a transaction to ensure data consistency
     const today = todayStr()
@@ -264,7 +263,7 @@ export async function DELETE(request: NextRequest) {
       success: true,
       data: {
         ...result,
-        message: (vehicle.isVip || isGuest)
+        message: vehicle.isVip
           ? `${vehicle.personName} ra khỏi bãi - Miễn phí`
           : `${vehicle.personName} ra khỏi bãi - Phí: ${fee.toLocaleString('vi-VN')}đ`,
       },

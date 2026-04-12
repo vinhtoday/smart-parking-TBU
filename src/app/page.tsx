@@ -16,7 +16,7 @@ import {
   History, BarChart3, Wifi, WifiOff, Clock,
   Eye, Users,
   Sun, Moon, Activity, Radio, DollarSign,
-  Copy, Flame, Wind, LogOut, UserCircle,
+  Copy, Flame, Wind, LogOut, UserCircle, UserRound,
 } from 'lucide-react'
 
 import {
@@ -38,6 +38,7 @@ import { useArduinoConnection } from '@/hooks/useArduinoConnection'
 import OverviewTab from '@/components/tabs/OverviewTab'
 import StudentsTab from '@/components/tabs/StudentsTab'
 import TeachersTab from '@/components/tabs/TeachersTab'
+import GuestsTab from '@/components/tabs/GuestsTab'
 import HistoryTab from '@/components/tabs/HistoryTab'
 import ReportsTab from '@/components/tabs/ReportsTab'
 import SettingsTab from '@/components/tabs/SettingsTab'
@@ -57,9 +58,10 @@ export default function ParkingDashboard() {
     stats, vehicles, students, teachers, config,
     history, historyTotal, historyPage, report, users,
     activityLogs, logsTotal, logsOffset,
-    lastSync, loading,
+    lastSync, loading, guestData,
     fetchStats, fetchVehicles, fetchStudents, fetchTeachers,
     fetchConfig, fetchHistory, fetchReport, fetchUsers, fetchActivityLogs,
+    fetchGuests: _fetchGuests,
     loadAll, refreshCore,
   } = useParkingData()
 
@@ -828,6 +830,10 @@ export default function ParkingDashboard() {
                 <span>Tài khoản</span>
               </TabsTrigger>
             )}
+            <TabsTrigger value="guests" className="gap-1.5 text-xs sm:text-sm">
+              <UserRound className="h-3.5 w-3.5" />
+              <span>Khách</span>
+            </TabsTrigger>
             <TabsTrigger value="history" className="gap-1.5 text-xs sm:text-sm">
               <History className="h-3.5 w-3.5" />
               <span>Lịch sử</span>
@@ -936,6 +942,15 @@ export default function ParkingDashboard() {
             />
           </TabsContent>
           )}
+
+          {/* ========== TAB: GUESTS ========== */}
+          <TabsContent value="guests">
+            <GuestsTab
+              guestData={guestData}
+              stats={stats}
+              vehicles={vehicles}
+            />
+          </TabsContent>
 
           {/* ========== TAB: HISTORY ========== */}
           <TabsContent value="history">

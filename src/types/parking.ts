@@ -4,12 +4,14 @@ export interface Stats {
   parkedCount: number
   studentCount: number
   teacherCount: number
+  guestCount: number
   freeSlots: number
   maxSlots: number
   feePerTrip: number
   todayEntries: number
   todayExits: number
   todayRevenue: number
+  todayGuestRevenue: number
   isOpen: boolean
   systemName: string
 }
