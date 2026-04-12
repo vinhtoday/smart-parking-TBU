@@ -31,7 +31,7 @@ export async function GET() {
         existing.visitCount++
         existing.totalFee += h.fee
         // Keep the most recent entryTime
-        if (h.entryTime && (!existing.lastEntry || h.entryTime > existing.lastEntry)) {
+        if (h.entryTime && (!existing.lastEntry || h.entryTime.getTime() > new Date(existing.lastEntry).getTime())) {
           existing.lastEntry = h.entryTime.toISOString()
         }
       } else {
