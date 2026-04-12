@@ -218,17 +218,15 @@ bun install
 
 # 2. Cấu hình .env từ file mẫu
 cp .env.example .env
-# → Chỉnh sửa .env: DATABASE_URL, NEXTAUTH_SECRET, ARDUINO_API_SECRET...
-# Xem .env.example để biết đầy đủ các biến môi trường
+# → Chỉnh sửa .env: thay USER, PASSWORD bằng thông tin MySQL của bạn
+# → Xem .env.example để biết đầy đủ các biến môi trường
 
 # HOẶC tạo thủ công:
 cat > .env << 'EOF'
-DATABASE_URL=mysql://vinh:123456@localhost:3306/parking_db
+DATABASE_URL=mysql://USER:PASSWORD@localhost:3306/parking_db
 NEXTAUTH_SECRET=your-random-secret-string-min-32-chars
 NEXTAUTH_URL=http://localhost:3000
 NEXT_PUBLIC_WS_URL=http://localhost:3003
-NEXT_PUBLIC_SERIAL_URL=http://localhost:3004
-NEXTJS_URL=http://localhost:3000
 WS_PORT=3003
 SERIAL_PORT=3004
 ARDUINO_SERIAL_PORT=COM5
@@ -747,7 +745,7 @@ curl -X POST http://localhost:3004/exit -H "Content-Type: application/json" -d '
 
 1. Kiểm tra MySQL đang chạy: `systemctl status mysql` (Linux) hoặc kiểm tra Services (Windows)
 2. Kiểm tra `.env` đúng: `DATABASE_URL=mysql://USER:PASSWORD@localhost:3306/parking_db`
-3. Đảm bảo database đã tạo: `CREATE DATABASE parking_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
+3. Đảm bảo database đã tạo: `CREATE DATABASE parking_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
 4. Push schema: `npx prisma db push`
 
 ### Prisma Client chưa generate
