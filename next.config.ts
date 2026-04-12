@@ -15,6 +15,15 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Ghi đè biến env hệ thống bằng giá trị từ .env
   env: envConfig.parsed,
+  // Turbopack config
+  turbopack: {
+    // Fix date-fns v4 internal ESM imports that Turbopack can't resolve
+    resolveAlias: {
+      "date-fns/parse": "date-fns/parse",
+      "date-fns/constructFrom": "date-fns/constructFrom",
+    },
+    resolveExtensions: [".js", ".mjs", ".ts", ".tsx", ".jsx"],
+  },
   // 🔒 Security headers
   async headers() {
     return [
