@@ -843,10 +843,12 @@ export default function ParkingDashboard() {
                 <span>Tài khoản</span>
               </TabsTrigger>
             )}
+            {isAdmin && (
             <TabsTrigger value="guests" className="gap-1.5 text-xs sm:text-sm">
               <UserRound className="h-3.5 w-3.5" />
               <span>Khách</span>
             </TabsTrigger>
+            )}
             <TabsTrigger value="history" className="gap-1.5 text-xs sm:text-sm">
               <History className="h-3.5 w-3.5" />
               <span>Lịch sử</span>
@@ -956,7 +958,8 @@ export default function ParkingDashboard() {
           </TabsContent>
           )}
 
-          {/* ========== TAB: GUESTS ========== */}
+          {/* ========== TAB: GUESTS (Admin only) ========== */}
+          {isAdmin && (
           <TabsContent value="guests">
             <GuestsTab
               guestData={guestData}
@@ -964,6 +967,7 @@ export default function ParkingDashboard() {
               onRefresh={() => { fetchStats(); fetchVehicles(); fetchGuests(); fetchStudents(); fetchTeachers() }}
             />
           </TabsContent>
+          )}
 
           {/* ========== TAB: HISTORY ========== */}
           <TabsContent value="history">

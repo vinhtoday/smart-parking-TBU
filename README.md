@@ -139,7 +139,7 @@ my-project/
 │   │       ├── auth/[...nextauth]/route.ts  # NextAuth API
 │   │       ├── activity-logs/route.ts # GET/POST activity logs (admin)
 │   │       ├── config/route.ts    # GET/PUT cấu hình
-│   │       ├── guests/route.ts    # GET dữ liệu khách (public)
+│   │       ├── guests/route.ts    # GET dữ liệu khách (admin)
 │   │       ├── history/route.ts   # GET lịch sử + phân trang + lọc ngày
 │   │       ├── report/route.ts    # GET báo cáo + doanh thu ngày
 │   │       ├── seed/route.ts      # POST seed dữ liệu (dev only, blocked in prod)
@@ -158,7 +158,7 @@ my-project/
 │   │   │   ├── OverviewTab.tsx    # Tổng quan + bảng xe đang đỗ
 │   │   │   ├── StudentsTab.tsx    # Quản lý sinh viên (CRUD)
 │   │   │   ├── TeachersTab.tsx    # Quản lý giảng viên (CRUD + VIP)
-│   │   │   ├── GuestsTab.tsx      # Thống kê khách + lịch sử hôm nay
+│   │   │   ├── GuestsTab.tsx      # Quản lý khách (admin): UID, phí cộng dồn, kê khai
 │   │   │   ├── ManageTab.tsx      # Quản lý tài khoản (admin)
 │   │   │   ├── HistoryTab.tsx     # Lịch sử + phân trang + lọc ngày + PDF
 │   │   │   ├── ReportsTab.tsx     # Báo cáo + biểu đồ doanh thu + Excel + PDF
@@ -263,7 +263,7 @@ Mở trình duyệt: **http://localhost:3000**
 | Username   | Password   | Quyền (admin)  | Mô tả                                          |
 | ---------- | ---------- | -------------- | ---------------------------------------------- |
 | `admin`    | `admin123` | 1 (Toàn quyền) | Xem tất cả 9 tab, chỉnh cấu hình, quản lý user |
-| `nhanvien` | `nv123456` | 0 (Giới hạn)   | Xem Tổng quan, Khách, Lịch sử, Báo cáo         |
+| `nhanvien` | `nv123456` | 0 (Giới hạn)   | Xem Tổng quan, Lịch sử, Báo cáo                   |
 
 > ⚠️ **Đổi mật khẩu ngay sau lần đăng nhập đầu tiên!** Seed chỉ chạy trong development (`NODE_ENV ≠ production`).
 
@@ -279,7 +279,7 @@ Mở trình duyệt: **http://localhost:3000**
 | Sinh viên  | ✅      | ❌      |
 | Giảng viên | ✅      | ❌      |
 | Tài khoản  | ✅      | ❌      |
-| Khách      | ✅      | ✅      |
+| Khách      | ✅      | ❌      |
 | Lịch sử    | ✅      | ✅      |
 | Báo cáo    | ✅      | ✅      |
 | Nhật ký    | ✅      | ❌      |
@@ -485,7 +485,7 @@ UPDATE User SET active = 0 WHERE username = 'someuser';
 
 | Method | Path          | Mô tả                                                           |
 | ------ | ------------- | --------------------------------------------------------------- |
-| GET    | `/api/guests` | Dữ liệu khách: đang đỗ, lịch sử hôm nay, thống kê (public)     |
+| GET    | `/api/guests` | Dữ liệu khách: tổng hợp theo UID (admin)                     |
 
 ### Students
 
@@ -643,13 +643,14 @@ curl -X POST http://localhost:3004/exit -H "Content-Type: application/json" -d '
 - **Error boundary**: Trang lỗi tự động với nút "Thử lại" (`error.tsx`)
 - **404 page**: Trang không tìm thấy với link về trang chủ (`not-found.tsx`)
 
-### Tab Khách (GuestsTab)
+### Tab Khách (GuestsTab) — Admin only
 
-- **Hiển thị cho tất cả users** (cả admin và nhân viên đều xem được)
-- **5 card thống kê**: Đang đỗ, Vào hôm nay, Ra hôm nay, Doanh thu khách, Khách riêng biệt
-- **Bảng khách đang đỗ**: UID, thời gian vào, thời gian đỗ, phí dự kiến
-- **Bảng lịch sử khách hôm nay**: UID, thời gian vào/ra, thời gian đỗ, phí thu, trạng thái
-- **Tự động tính phí**: 2000đ/lượt (theo cấu hình `feePerTrip`)
+- **Quản lý khách vãng lai**: Bảng UID khách chưa đăng ký sinh viên/giảng viên
+- **Tự động lưu UID**: Khi RFID quét thẻ chưa đăng ký, hệ thống tự tạo record khách
+- **Cộng dồn phí theo UID**: Tổng số lần gửi xe và tổng tiền lũy kế cho mỗi UID
+- **Trạng thái realtime**: Hiển thị đang đỗ / đã ra cho mỗi khách
+- **Kê khai khách**: Nút chuyển đổi khách thành sinh viên hoặc giảng viên (đăng ký UID vào hệ thống)
+- **Phí**: 2000đ/lượt (theo cấu hình `feePerTrip`, giống sinh viên)
 
 ### Realtime
 
@@ -831,7 +832,7 @@ crontab -e
 │  Web Dashboard (browser)                                     │
 │  ┌─ POST/DELETE /api/vehicles ── NextAuth session ─────────┐ │
 │  ├─ GET /api/vehicles ──────── Public (read-only) ──────────┤ │
-│  ├─ GET /api/guests ─────────── Public (read-only) ─────────┤ │
+│  ├─ GET /api/guests ─────────── Admin only ─────────────────┤ │
 │  ├─ GET /api/stats ─────────── Public (read-only) ──────────┤ │
 │  ├─ GET /api/health ─────────── Public (no auth) ───────────┤ │
 │  ├─ /api/students, teachers ── requireAuth/requireAdmin ───┤ │
@@ -889,15 +890,23 @@ Các lệnh khác → trả 403 Forbidden.
 
 ## 📝 Lịch Sử Cập Nhật
 
+### v0.7.0 — Guest Tab Restrict
+
+**🟡 Changes:**
+
+- **Tab Khách chỉ cho Admin**: Ẩn tab Khách đối với tài khoản nhân viên (admin=0) — trước đó cả admin và nhân viên đều xem được
+- **Tab Khách giản lược**: Bảng quản lý khách đơn giản — UID, số lần, tổng tiền, lần cuối, trạng thái, nút kê khai
+- **Phí khách = phí sinh viên**: 2000đ/lượt (theo cấu hình `feePerTrip`), cộng dồn theo UID
+- **Cập nhật README.md**: Sửa mô tả tab Khách, bảng phân quyền, API endpoints
+
 ### v0.6.0 — Guest Tab & date-fns Fix
 
 **🟢 Features:**
 
-- **Tab Khách (GuestsTab)**: Tab mới cho tất cả users — thống kê và theo dõi khách vãng lai
-  - 5 card thống kê: Đang đỗ, Vào hôm nay, Ra hôm nay, Doanh thu khách, Khách riêng biệt
-  - Bảng khách đang đỗ: UID, thời gian vào, thời gian đỗ, phí dự kiến
-  - Bảng lịch sử khách hôm nay: UID, thời gian vào/ra, thời gian đỗ, phí thu, trạng thái (Đang đỗ/Đã ra)
-- **API `/api/guests`**: Endpoint public — trả dữ liệu khách đang đỗ, lịch sử hôm nay, thống kê
+- **Tab Khách (GuestsTab)**: Tab mới cho admin — quản lý khách vãng lai
+  - Bảng tổng hợp khách theo UID: số lần, tổng tiền, lần cuối, trạng thái
+  - Nút kê khai: chuyển khách thành sinh viên hoặc giảng viên
+- **API `/api/guests`**: Endpoint — trả dữ liệu tổng hợp khách theo UID (visitCount, totalFee, isParked)
 - **Stats mở rộng**: Thêm `guestCount` và `todayGuestRevenue` vào response `/api/stats`
 - **Dashboard 9 tabs**: Cập nhật từ 8 → 9 tabs
 
