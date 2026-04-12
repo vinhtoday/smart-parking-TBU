@@ -61,7 +61,7 @@ export default function ParkingDashboard() {
     lastSync, loading, guestData,
     fetchStats, fetchVehicles, fetchStudents, fetchTeachers,
     fetchConfig, fetchHistory, fetchReport, fetchUsers, fetchActivityLogs,
-    fetchGuests: _fetchGuests,
+    fetchGuests,
     loadAll, refreshCore,
   } = useParkingData()
 
@@ -75,14 +75,14 @@ export default function ParkingDashboard() {
 
   // Socket.IO — pass callbacks via refs (stable socket connection)
   const { connected: wsConnected, emit: socketEmit } = useSocketIO({
-    onVehicleEntry: () => { toast.success('🚗 Xe mới vào bãi đỗ!'); refreshCore() },
-    onVehicleExit: () => { toast.info('🚙 Xe đã rời bãi đỗ'); refreshCore() },
+    onVehicleEntry: () => { toast.success('🚗 Xe mới vào bãi đỗ!'); refreshCore(); fetchGuests() },
+    onVehicleExit: () => { toast.info('🚙 Xe đã rời bãi đỗ'); refreshCore(); fetchGuests() },
     onRfidScan: (uid) => {
       if (uid) setLastScannedUid(uid)
       refreshCore()
     },
     onStatusChange: () => { fetchStats(); fetchConfig() },
-    onFullSync: () => { refreshCore() },
+    onFullSync: () => { refreshCore(); fetchGuests() },
     onFireAlarm: (data: SocketAlarmData) => {
       const source = (data.source || 'UNKNOWN').toUpperCase()
       const message = data.message || 'CẢNH BÁO!'
@@ -949,6 +949,7 @@ export default function ParkingDashboard() {
               guestData={guestData}
               stats={stats}
               vehicles={vehicles}
+              onRefresh={() => { refreshCore(); fetchGuests(); fetchStudents(); fetchTeachers() }}
             />
           </TabsContent>
 

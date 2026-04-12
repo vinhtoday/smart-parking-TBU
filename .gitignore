@@ -49,7 +49,6 @@ dev.sh
 Caddyfile
 
 # unused components / old code
-/src/app/api/guests/
 /src/app/api/route.ts
 /src/arduino/
 /examples/
