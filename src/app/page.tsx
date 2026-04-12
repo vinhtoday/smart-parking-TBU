@@ -971,7 +971,6 @@ export default function ParkingDashboard() {
             <ReportsTab
               report={report}
               reportPeriod={reportPeriod}
-              setReportPeriod={setReportPeriod}
               reportStart={reportStart}
               setReportStart={setReportStart}
               reportEnd={reportEnd}
@@ -1011,7 +1010,6 @@ export default function ParkingDashboard() {
               setCustomPort={setCustomPort}
               connecting={connecting}
               handleConnectSerial={handleConnectSerial}
-              stats={stats}
               students={students}
               teachers={teachers}
               historyTotal={historyTotal}

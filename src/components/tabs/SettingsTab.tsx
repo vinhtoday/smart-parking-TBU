@@ -8,7 +8,7 @@ import {
   Settings, Radio, RefreshCw, Monitor,
 } from 'lucide-react'
 
-import type { Stats, Student, Teacher } from '@/types/parking'
+import type { Student, Teacher } from '@/types/parking'
 import type { ArduinoStatus, SerialPortInfo } from '@/types/arduino'
 
 interface SettingsTabProps {
@@ -23,7 +23,6 @@ interface SettingsTabProps {
   setCustomPort: (v: string) => void
   connecting: boolean
   handleConnectSerial: (port: string) => Promise<void>
-  stats: Stats | null
   students: Student[]
   teachers: Teacher[]
   historyTotal: number
@@ -42,7 +41,6 @@ export default function SettingsTab({
   setCustomPort,
   connecting,
   handleConnectSerial,
-  stats,
   students,
   teachers,
   historyTotal,

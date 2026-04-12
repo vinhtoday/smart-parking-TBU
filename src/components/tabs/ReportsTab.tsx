@@ -25,7 +25,6 @@ import type { ReportData, ReportPeriod } from '@/types/parking'
 interface ReportsTabProps {
   report: ReportData | null
   reportPeriod: ReportPeriod
-  setReportPeriod: (v: ReportPeriod) => void
   reportStart: Date | undefined
   setReportStart: (v: Date | undefined) => void
   reportEnd: Date | undefined
@@ -40,7 +39,6 @@ interface ReportsTabProps {
 export default function ReportsTab({
   report,
   reportPeriod,
-  setReportPeriod,
   reportStart,
   setReportStart,
   reportEnd,

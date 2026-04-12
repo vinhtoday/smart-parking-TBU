@@ -38,6 +38,7 @@ export async function POST() {
     })
 
     if (!existingAdmin) {
+      console.warn('[SEED] Created default admin account (admin/admin123). Change this password immediately!')
       const hashedPassword = await bcrypt.hash('admin123', 10)
       await db.user.create({
         data: {
@@ -55,6 +56,7 @@ export async function POST() {
     })
 
     if (!existingStaff) {
+      console.warn('[SEED] Created default staff account (nhanvien/nv123456). Change this password immediately!')
       const hashedPassword = await bcrypt.hash('nv123456', 10)
       await db.user.create({
         data: {

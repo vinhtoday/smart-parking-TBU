@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { signIn } from 'next-auth/react'
 import { useTheme } from 'next-themes'
-import { toast } from 'sonner'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

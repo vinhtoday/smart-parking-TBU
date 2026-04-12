@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    let { rfidUid, personName, personType, isVip } = body
+    let { rfidUid } = body
 
     // Normalize UID: strip spaces + uppercase (Arduino may send "A3 B2 C1 D0")
     rfidUid = (rfidUid || '').replace(/\s+/g, '').toUpperCase()
