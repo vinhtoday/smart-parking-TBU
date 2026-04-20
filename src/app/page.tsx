@@ -592,8 +592,11 @@ export default function ParkingDashboard() {
       <div className="min-h-screen p-4 md:p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Skeleton className="h-11 w-11 rounded-full" />
-            <Skeleton className="h-7 w-80" />
+            <Skeleton className="h-14 w-14 rounded-full" />
+            <div className="space-y-1.5">
+              <Skeleton className="h-6 w-64" />
+              <Skeleton className="h-3 w-48" />
+            </div>
           </div>
           <div className="flex gap-2">
             <Skeleton className="h-9 w-9" />
@@ -613,93 +616,96 @@ export default function ParkingDashboard() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* ============= HEADER ============= */}
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 dark:from-slate-950 dark:via-blue-950 dark:to-indigo-950 shadow-lg shadow-blue-900/20 dark:shadow-[0_4px_30px_rgba(0,0,0,0.3)] border-b border-blue-600/20 dark:border-blue-500/20 relative">
-        {/* Subtle top accent line */}
-        <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400/50 to-transparent" />
+      <header className="sticky top-0 z-40 relative">
+        {/* Top gold accent line */}
+        <div className="h-[3px] bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500" />
 
-        {/* Subtle depth overlays */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_50%,rgba(59,130,246,0.08)_0%,transparent_60%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_50%,rgba(99,102,241,0.06)_0%,transparent_60%)] pointer-events-none" />
+        <div className="backdrop-blur-xl bg-gradient-to-r from-blue-800 via-blue-900 to-indigo-900 dark:from-slate-950 dark:via-[#0a1628] dark:to-indigo-950 shadow-lg shadow-blue-950/30 dark:shadow-[0_4px_30px_rgba(0,0,0,0.4)]">
+          {/* Subtle depth overlays */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_15%_50%,rgba(59,130,246,0.1)_0%,transparent_50%)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_85%_50%,rgba(99,102,241,0.08)_0%,transparent_50%)] pointer-events-none" />
 
-        <div className="max-w-[1600px] mx-auto px-4 md:px-6 flex items-center justify-between h-14 relative z-10">
-          {/* Left section */}
-          <div className="flex items-center gap-3 min-w-0">
-            {/* Logo with gold glow accent */}
-            <div className="relative flex-shrink-0">
-              <div className="absolute -inset-0.5 rounded-full bg-gradient-to-br from-amber-400/40 to-amber-600/20 blur-[2px]" />
-              <img src="/tbu-logo.jpg" alt="Logo TBU" className="relative h-10 w-10 md:h-11 md:w-11 rounded-full object-cover shadow-lg ring-2 ring-white/20 ring-offset-1 ring-offset-blue-900 dark:ring-offset-slate-900/50" />
-            </div>
-
-            {/* Title with gradient text + subtitle */}
-            <div className="min-w-0">
-              <h1 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-extrabold tracking-wide text-white truncate">
-                HỆ THỐNG BÃI ĐỖ XE THÔNG MINH
-              </h1>
-              <p className="text-[10px] sm:text-xs font-semibold tracking-[0.2em] text-amber-300/80 dark:text-amber-200/60 uppercase hidden sm:block">
-                Trường đại học Thái Bình
-              </p>
-            </div>
-
-          </div>
-
-          {/* Right section */}
-          <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
-            {mounted && (
-              <div className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold tracking-wide uppercase transition-colors ${wsConnected ? 'bg-emerald-500/10 text-emerald-300 ring-1 ring-emerald-500/20' : 'bg-red-500/10 text-red-300 ring-1 ring-red-500/20'}`}>
-                <Wifi className="h-3 w-3" />
-                WS {wsConnected ? '✔' : '✘'}
+          <div className="max-w-[1600px] mx-auto px-4 md:px-6 flex items-center justify-between h-[72px] relative z-10">
+            {/* Left section - University branding */}
+            <div className="flex items-center gap-3.5 min-w-0">
+              {/* Logo with prominent gold ring */}
+              <div className="relative flex-shrink-0">
+                <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 opacity-60 blur-[3px]" />
+                <img src="/tbu-logo.jpg" alt="Logo TBU" className="relative h-12 w-12 md:h-14 md:w-14 rounded-full object-cover shadow-xl ring-[3px] ring-amber-400/50 ring-offset-2 ring-offset-blue-900 dark:ring-offset-[#0a1628]" />
               </div>
-            )}
-            {mounted && (
-              <div className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold tracking-wide uppercase transition-colors ${arduinoConnected ? 'bg-sky-500/10 text-sky-300 ring-1 ring-sky-500/20' : 'bg-amber-500/10 text-amber-300 ring-1 ring-amber-500/20'}`}>
-                {arduinoConnected ? <Radio className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
-                Arduino {arduinoConnected ? '✔' : '✘'}
-              </div>
-            )}
-            <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 ring-1 ring-white/10 text-[11px] text-blue-200/90 font-mono font-semibold tracking-wider">
-              <Clock className="h-3 w-3 text-amber-400/70" />
-              {mounted ? currentTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '--:--:--'}
-            </div>
-            <div className="w-px h-6 bg-white/10 hidden sm:block mx-0.5" />
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-white/80 hover:text-amber-300 hover:bg-white/10 rounded-lg transition-colors" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-              {mounted && theme === 'dark' ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
-            </Button>
 
-            {/* User info & Logout */}
-            {session && (
-              <>
-                <div className="w-px h-6 bg-white/10 hidden sm:block mx-0.5" />
-                <div className="flex items-center gap-1.5">
-                  <div className="hidden sm:flex flex-col items-end">
-                    <span className="text-[11px] font-semibold text-white/90 leading-tight truncate max-w-[100px]">
-                      {session.user?.name}
-                    </span>
-                    <span className={`text-[9px] font-bold leading-tight px-1.5 py-0 rounded ${isAdmin ? 'bg-amber-400/20 text-amber-300' : 'bg-slate-400/20 text-slate-300'}`}>
-                      {isAdmin ? 'Admin' : 'Nhân viên'}
-                    </span>
-                  </div>
-                  <div className="relative flex-shrink-0">
-                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center ring-1 ring-white/20">
-                      <UserCircle className="h-5 w-5 text-white/80" />
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-white/60 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
-                    onClick={() => signOut({ callbackUrl: '/login' })}
-                    title="Đăng xuất"
-                  >
-                    <LogOut className="h-3.5 w-3.5" />
-                  </Button>
+              {/* University name — PRIMARY */}
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-xl md:text-2xl lg:text-[1.65rem] font-black tracking-wide leading-tight">
+                  <span className="bg-gradient-to-r from-amber-200 via-yellow-200 to-amber-100 bg-clip-text text-transparent drop-shadow-sm">
+                    TRƯỜNG ĐẠI HỌC THÁI BÌNH
+                  </span>
+                </h1>
+                <p className="text-[10px] sm:text-xs md:text-[13px] font-semibold tracking-[0.15em] text-blue-200/70 dark:text-blue-300/60 mt-0.5 hidden sm:block">
+                  HỆ THỐNG QUẢN LÝ BÃI ĐỖ XE THÔNG MINH
+                </p>
+              </div>
+            </div>
+
+            {/* Right section */}
+            <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
+              {mounted && (
+                <div className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold tracking-wide uppercase transition-colors ${wsConnected ? 'bg-emerald-500/10 text-emerald-300 ring-1 ring-emerald-500/20' : 'bg-red-500/10 text-red-300 ring-1 ring-red-500/20'}`}>
+                  <Wifi className="h-3 w-3" />
+                  WS {wsConnected ? '✔' : '✘'}
                 </div>
-              </>
-            )}
-          </div>
-        </div>
+              )}
+              {mounted && (
+                <div className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold tracking-wide uppercase transition-colors ${arduinoConnected ? 'bg-sky-500/10 text-sky-300 ring-1 ring-sky-500/20' : 'bg-amber-500/10 text-amber-300 ring-1 ring-amber-500/20'}`}>
+                  {arduinoConnected ? <Radio className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+                  Arduino {arduinoConnected ? '✔' : '✘'}
+                </div>
+              )}
+              <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 ring-1 ring-white/10 text-[11px] text-blue-200/90 font-mono font-semibold tracking-wider">
+                <Clock className="h-3 w-3 text-amber-400/70" />
+                {mounted ? currentTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '--:--:--'}
+              </div>
+              <div className="w-px h-6 bg-white/10 hidden sm:block mx-0.5" />
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-white/80 hover:text-amber-300 hover:bg-white/10 rounded-lg transition-colors" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+                {mounted && theme === 'dark' ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+              </Button>
 
-        {/* Bottom accent glow line */}
-        <div className="absolute bottom-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/30 to-transparent" />
+              {/* User info & Logout */}
+              {session && (
+                <>
+                  <div className="w-px h-6 bg-white/10 hidden sm:block mx-0.5" />
+                  <div className="flex items-center gap-1.5">
+                    <div className="hidden sm:flex flex-col items-end">
+                      <span className="text-[11px] font-semibold text-white/90 leading-tight truncate max-w-[100px]">
+                        {session.user?.name}
+                      </span>
+                      <span className={`text-[9px] font-bold leading-tight px-1.5 py-0 rounded ${isAdmin ? 'bg-amber-400/20 text-amber-300' : 'bg-slate-400/20 text-slate-300'}`}>
+                        {isAdmin ? 'Admin' : 'Nhân viên'}
+                      </span>
+                    </div>
+                    <div className="relative flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center ring-1 ring-white/20">
+                        <UserCircle className="h-5 w-5 text-white/80" />
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-white/60 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
+                      onClick={() => signOut({ callbackUrl: '/login' })}
+                      title="Đăng xuất"
+                    >
+                      <LogOut className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Bottom gold accent line */}
+          <div className="h-[2px] bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
+        </div>
       </header>
 
       {/* ============= FIRE / GAS ALARM BANNER ============= */}
