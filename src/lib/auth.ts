@@ -5,33 +5,14 @@ import { db } from '@/lib/db'
 import { rateLimit } from '@/lib/rate-limit'
 
 /**
- * Verify math CAPTCHA.
- * Supports: a + b, a - b (no negative results), a × b
- * Numbers range from 2-50 to prevent trivial brute-force.
+ * Verify text CAPTCHA.
+ * The captcha field contains the generated text (e.g. "A3xK7").
+ * The captchaAnswer field contains the user's input (case-insensitive).
  */
-function verifyCaptcha(expression: string, answer: string): boolean {
-  const parts = expression.trim().split(' ')
-  if (parts.length !== 3) return false
-  const a = parseInt(parts[0])
-  const op = parts[1]
-  const b = parseInt(parts[2])
-  if (isNaN(a) || isNaN(b)) return false
-
-  let expected: number
-  switch (op) {
-    case '+': expected = a + b; break
-    case '-':
-      if (a < b) return false // Prevent negative results
-      expected = a - b
-      break
-    case '×': expected = a * b; break
-    default: return false
-  }
-
-  // Reject trivially simple expressions (single digit)
-  if (a < 2 || b < 2) return false
-
-  return parseInt(answer) === expected
+function verifyCaptcha(captchaText: string, userInput: string): boolean {
+  if (!captchaText || !userInput) return false
+  // Case-insensitive comparison, trimmed
+  return captchaText.trim().toLowerCase() === userInput.trim().toLowerCase()
 }
 
 export const authOptions: NextAuthOptions = {

@@ -182,19 +182,33 @@
   border-left: 3px dashed oklch(0.8 0 0 / 30%);
 }
 
-/* Card Hover Effects */
+/* Card Hover Effects — enhanced with scale + stronger shadow */
 .parking-card-hover {
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.3s ease;
 }
 .parking-card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px oklch(0 0 0 / 10%),
-              0 2px 8px oklch(0 0 0 / 6%);
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 12px 32px oklch(0 0 0 / 12%),
+              0 4px 12px oklch(0 0 0 / 8%);
 }
 .dark .parking-card-hover:hover {
-  box-shadow: 0 8px 24px oklch(0 0 0 / 35%),
-              0 2px 8px oklch(0 0 0 / 20%);
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 12px 32px oklch(0 0 0 / 40%),
+              0 4px 12px oklch(0 0 0 / 25%);
+}
+
+/* Glassmorphism card base */
+.glass-card {
+  background: oklch(1 0 0 / 70%);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid oklch(0 0 0 / 6%);
+}
+.dark .glass-card {
+  background: oklch(0.22 0 0 / 70%);
+  border: 1px solid oklch(1 0 0 / 8%);
 }
 
 /* Status Indicator Animations */
@@ -273,9 +287,60 @@
 .animate-fade-up-delay-3 { animation-delay: 0.15s; }
 .animate-fade-up-delay-4 { animation-delay: 0.2s; }
 
+/* ===== Shimmer animation for header university name ===== */
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+.animate-shimmer {
+  background-size: 200% auto;
+  animation: shimmer 4s linear infinite;
+}
+
+/* ===== Login page animated gradient background ===== */
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* ===== Login card glass glow effect ===== */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 30px oklch(0.6 0.15 250 / 15%), 0 0 60px oklch(0.6 0.15 250 / 5%);
+  }
+  50% {
+    box-shadow: 0 0 40px oklch(0.6 0.15 250 / 25%), 0 0 80px oklch(0.6 0.15 250 / 10%);
+  }
+}
+.animate-glow {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* ===== Floating particles ===== */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-20px) rotate(180deg);
+    opacity: 0.6;
+  }
+}
 
 /* Theme toggle transition - scoped to prevent hydration flickering */
-/* Only apply to interactive and themed elements, NOT all elements */
 button, a, input, select, textarea,
 .badge, .card, .tabs-trigger, [role="tab"],
 .parking-card-hover, .parking-slot {
@@ -290,103 +355,133 @@ button, a, input, select, textarea,
   transition: none !important;
 }
 
-/* Stat card gradient borders */
+/* ===== Stat card glassmorphism with left accent borders ===== */
+.stat-card-glass {
+  position: relative;
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+}
+.stat-card-glass::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+}
+
+.stat-card-emerald::before {
+  background: linear-gradient(180deg, oklch(0.7 0.17 162), oklch(0.55 0.18 165));
+}
+.stat-card-sky::before {
+  background: linear-gradient(180deg, oklch(0.7 0.15 230), oklch(0.6 0.16 235));
+}
+.stat-card-amber::before {
+  background: linear-gradient(180deg, oklch(0.8 0.16 85), oklch(0.7 0.17 75));
+}
+.stat-card-violet::before {
+  background: linear-gradient(180deg, oklch(0.65 0.2 290), oklch(0.55 0.22 285));
+}
+.stat-card-cyan::before {
+  background: linear-gradient(180deg, oklch(0.75 0.15 210), oklch(0.65 0.16 215));
+}
+
+/* Stat card subtle gradient background (light mode) */
 .stat-card-emerald {
-  position: relative;
+  background: linear-gradient(135deg, oklch(0.98 0.01 162 / 60%), oklch(0.99 0 0 / 80%));
 }
-.stat-card-emerald::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, oklch(0.7 0.17 162), oklch(0.6 0.15 180));
-  border-radius: 0 0 var(--radius) var(--radius);
-}
-.stat-card-amber {
-  position: relative;
-}
-.stat-card-amber::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, oklch(0.8 0.16 85), oklch(0.75 0.15 75));
-  border-radius: 0 0 var(--radius) var(--radius);
-}
-.stat-card-green {
-  position: relative;
-}
-.stat-card-green::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, oklch(0.7 0.2 145), oklch(0.65 0.19 155));
-  border-radius: 0 0 var(--radius) var(--radius);
-}
-.stat-card-violet {
-  position: relative;
-}
-.stat-card-violet::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, oklch(0.65 0.2 290), oklch(0.6 0.18 280));
-  border-radius: 0 0 var(--radius) var(--radius);
-}
-.stat-card-rose {
-  position: relative;
-}
-.stat-card-rose::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, oklch(0.65 0.2 15), oklch(0.6 0.18 10));
-  border-radius: 0 0 var(--radius) var(--radius);
+.dark .stat-card-emerald {
+  background: linear-gradient(135deg, oklch(0.22 0.02 162 / 40%), oklch(0.2 0 0 / 60%));
 }
 .stat-card-sky {
-  position: relative;
+  background: linear-gradient(135deg, oklch(0.97 0.015 230 / 60%), oklch(0.99 0 0 / 80%));
 }
-.stat-card-sky::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, oklch(0.7 0.15 230), oklch(0.65 0.13 220));
-  border-radius: 0 0 var(--radius) var(--radius);
+.dark .stat-card-sky {
+  background: linear-gradient(135deg, oklch(0.22 0.02 230 / 40%), oklch(0.2 0 0 / 60%));
+}
+.stat-card-amber {
+  background: linear-gradient(135deg, oklch(0.98 0.015 85 / 60%), oklch(0.99 0 0 / 80%));
+}
+.dark .stat-card-amber {
+  background: linear-gradient(135deg, oklch(0.22 0.02 85 / 40%), oklch(0.2 0 0 / 60%));
+}
+.stat-card-violet {
+  background: linear-gradient(135deg, oklch(0.97 0.02 290 / 60%), oklch(0.99 0 0 / 80%));
+}
+.dark .stat-card-violet {
+  background: linear-gradient(135deg, oklch(0.22 0.02 290 / 40%), oklch(0.2 0 0 / 60%));
 }
 .stat-card-cyan {
-  position: relative;
+  background: linear-gradient(135deg, oklch(0.97 0.015 210 / 60%), oklch(0.99 0 0 / 80%));
 }
-.stat-card-cyan::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, oklch(0.75 0.15 210), oklch(0.7 0.13 200));
-  border-radius: 0 0 var(--radius) var(--radius);
+.dark .stat-card-cyan {
+  background: linear-gradient(135deg, oklch(0.22 0.02 210 / 40%), oklch(0.2 0 0 / 60%));
 }
 
 /* Alarm scanning line animation */
 @keyframes scan {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
+}
+
+/* ===== Modern tab styles ===== */
+.modern-tabs {
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid oklch(0 0 0 / 5%);
+}
+.dark .modern-tabs {
+  border-color: oklch(1 0 0 / 8%);
+}
+
+.modern-tab-trigger {
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.modern-tab-trigger:hover {
+  background: oklch(0.95 0 0 / 80%);
+}
+.dark .modern-tab-trigger:hover {
+  background: oklch(0.3 0 0 / 60%);
+}
+.modern-tab-trigger[data-state="active"] {
+  background: linear-gradient(135deg, oklch(0.4 0.1 250), oklch(0.45 0.12 260)) !important;
+  color: white !important;
+  box-shadow: 0 2px 8px oklch(0.4 0.1 250 / 30%);
+}
+
+/* ===== Focus ring styles ===== */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  box-shadow: 0 0 0 3px oklch(0.6 0.15 250 / 25%);
+}
+
+/* ===== Better scrollbar for the whole app ===== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.7 0 0 / 30%) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: oklch(0.7 0 0 / 20%);
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: oklch(0.7 0 0 / 40%);
+}
+.dark *::-webkit-scrollbar-thumb {
+  background-color: oklch(0.7 0 0 / 30%);
+}
+.dark *::-webkit-scrollbar-thumb:hover {
+  background-color: oklch(0.7 0 0 / 50%);
 }
 
 /* Responsive utilities */

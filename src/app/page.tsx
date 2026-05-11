@@ -620,48 +620,51 @@ export default function ParkingDashboard() {
         {/* Top gold accent line */}
         <div className="h-[3px] bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500" />
 
-        <div className="backdrop-blur-xl bg-gradient-to-r from-blue-800 via-blue-900 to-indigo-900 dark:from-slate-950 dark:via-[#0a1628] dark:to-indigo-950 shadow-lg shadow-blue-950/30 dark:shadow-[0_4px_30px_rgba(0,0,0,0.4)]">
+        <div className="backdrop-blur-xl bg-gradient-to-r from-[#1e3a5f] via-[#1a2e52] to-[#312e81] dark:from-[#0a1225] dark:via-[#080f1f] dark:to-[#1e1b4b] shadow-lg shadow-blue-950/30 dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
           {/* Subtle depth overlays */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_15%_50%,rgba(59,130,246,0.1)_0%,transparent_50%)] pointer-events-none" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_85%_50%,rgba(99,102,241,0.08)_0%,transparent_50%)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_15%_50%,rgba(59,130,246,0.08)_0%,transparent_50%)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_85%_50%,rgba(99,102,241,0.06)_0%,transparent_50%)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(251,191,36,0.04)_0%,transparent_40%)] pointer-events-none" />
 
           <div className="max-w-[1600px] mx-auto px-4 md:px-6 flex items-center justify-between h-[72px] relative z-10">
             {/* Left section - University branding */}
             <div className="flex items-center gap-3.5 min-w-0">
-              {/* Logo with prominent gold ring */}
+              {/* Logo with prominent gold ring + glow */}
               <div className="relative flex-shrink-0">
-                <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 opacity-60 blur-[3px]" />
-                <img src="/tbu-logo.jpg" alt="Logo TBU" className="relative h-12 w-12 md:h-14 md:w-14 rounded-full object-cover shadow-xl ring-[3px] ring-amber-400/50 ring-offset-2 ring-offset-blue-900 dark:ring-offset-[#0a1628]" />
+                <div className="absolute -inset-1.5 rounded-full bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 opacity-50 blur-[4px] animate-pulse" style={{ animationDuration: '3s' }} />
+                <div className="relative p-[2.5px] rounded-full bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-600">
+                  <img src="/tbu-logo.jpg" alt="Logo TBU" className="h-12 w-12 md:h-14 md:w-14 rounded-full object-cover" />
+                </div>
               </div>
 
-              {/* University name — PRIMARY */}
+              {/* University name — PRIMARY with shimmer */}
               <div className="min-w-0">
                 <h1 className="text-base sm:text-xl md:text-2xl lg:text-[1.65rem] font-black tracking-wide leading-tight">
-                  <span className="bg-gradient-to-r from-amber-200 via-yellow-200 to-amber-100 bg-clip-text text-transparent drop-shadow-sm">
+                  <span className="bg-gradient-to-r from-amber-200 via-yellow-300 via-amber-200 to-yellow-300 bg-clip-text text-transparent animate-shimmer">
                     TRƯỜNG ĐẠI HỌC THÁI BÌNH
                   </span>
                 </h1>
-                <p className="text-[10px] sm:text-xs md:text-[13px] font-semibold tracking-[0.15em] text-blue-200/70 dark:text-blue-300/60 mt-0.5 hidden sm:block">
+                <p className="text-[10px] sm:text-xs md:text-[13px] font-semibold tracking-[0.15em] text-blue-200/60 dark:text-blue-300/50 mt-0.5 hidden sm:block">
                   HỆ THỐNG QUẢN LÝ BÃI ĐỖ XE THÔNG MINH
                 </p>
               </div>
             </div>
 
-            {/* Right section */}
+            {/* Right section — glassmorphism status indicators */}
             <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
               {mounted && (
-                <div className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold tracking-wide uppercase transition-colors ${wsConnected ? 'bg-emerald-500/10 text-emerald-300 ring-1 ring-emerald-500/20' : 'bg-red-500/10 text-red-300 ring-1 ring-red-500/20'}`}>
+                <div className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-semibold tracking-wide uppercase transition-all duration-300 backdrop-blur-sm ${wsConnected ? 'bg-emerald-500/10 text-emerald-300 ring-1 ring-emerald-500/25' : 'bg-red-500/10 text-red-300 ring-1 ring-red-500/25'}`}>
                   <Wifi className="h-3 w-3" />
                   WS {wsConnected ? '✔' : '✘'}
                 </div>
               )}
               {mounted && (
-                <div className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold tracking-wide uppercase transition-colors ${arduinoConnected ? 'bg-sky-500/10 text-sky-300 ring-1 ring-sky-500/20' : 'bg-amber-500/10 text-amber-300 ring-1 ring-amber-500/20'}`}>
+                <div className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-semibold tracking-wide uppercase transition-all duration-300 backdrop-blur-sm ${arduinoConnected ? 'bg-sky-500/10 text-sky-300 ring-1 ring-sky-500/25' : 'bg-amber-500/10 text-amber-300 ring-1 ring-amber-500/25'}`}>
                   {arduinoConnected ? <Radio className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
                   Arduino {arduinoConnected ? '✔' : '✘'}
                 </div>
               )}
-              <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 ring-1 ring-white/10 text-[11px] text-blue-200/90 font-mono font-semibold tracking-wider">
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 backdrop-blur-sm ring-1 ring-white/10 text-[11px] text-blue-200/90 font-mono font-semibold tracking-wider">
                 <Clock className="h-3 w-3 text-amber-400/70" />
                 {mounted ? currentTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '--:--:--'}
               </div>
@@ -674,24 +677,24 @@ export default function ParkingDashboard() {
               {session && (
                 <>
                   <div className="w-px h-6 bg-white/10 hidden sm:block mx-0.5" />
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
                     <div className="hidden sm:flex flex-col items-end">
                       <span className="text-[11px] font-semibold text-white/90 leading-tight truncate max-w-[100px]">
                         {session.user?.name}
                       </span>
-                      <span className={`text-[9px] font-bold leading-tight px-1.5 py-0 rounded ${isAdmin ? 'bg-amber-400/20 text-amber-300' : 'bg-slate-400/20 text-slate-300'}`}>
+                      <span className={`text-[9px] font-bold leading-tight px-2 py-0.5 rounded-md ${isAdmin ? 'bg-amber-400/15 text-amber-300 ring-1 ring-amber-400/20' : 'bg-slate-400/15 text-slate-300 ring-1 ring-slate-400/20'}`}>
                         {isAdmin ? 'Admin' : 'Nhân viên'}
                       </span>
                     </div>
                     <div className="relative flex-shrink-0">
-                      <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center ring-1 ring-white/20">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center ring-1 ring-white/20 backdrop-blur-sm">
                         <UserCircle className="h-5 w-5 text-white/80" />
                       </div>
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-white/60 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
+                      className="h-8 w-8 text-white/50 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
                       onClick={() => signOut({ callbackUrl: '/login' })}
                       title="Đăng xuất"
                     >
@@ -704,7 +707,7 @@ export default function ParkingDashboard() {
           </div>
 
           {/* Bottom gold accent line */}
-          <div className="h-[2px] bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
+          <div className="h-[2px] bg-gradient-to-r from-transparent via-amber-400/30 to-transparent" />
         </div>
       </header>
 
@@ -737,140 +740,150 @@ export default function ParkingDashboard() {
 
       {/* ============= MAIN CONTENT ============= */}
       <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 md:px-6 py-4 md:py-6 space-y-6">
-        {/* Stats Cards - responsive: 1 col on mobile, 2 on sm, 3 on md, 5 on lg */}
+        {/* Stats Cards — glassmorphism with accent borders */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
-          {/* Card 1: Tổng xe / Vị trí trống */}
-          <Card className="parking-card-hover stat-card-emerald overflow-hidden animate-fade-up animate-fade-up-delay-1">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-muted-foreground">Xe đang gửi</span>
-                <Car className="h-4 w-4 text-emerald-600" />
+          {/* Card 1: Xe đang gửi */}
+          <Card className="parking-card-hover stat-card-emerald stat-card-glass overflow-hidden rounded-xl border-0 animate-fade-up animate-fade-up-delay-1">
+            <CardContent className="p-4 pl-6">
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-xs font-semibold text-muted-foreground">Xe đang gửi</span>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+                  <Car className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                </div>
               </div>
-              <div className="text-2xl font-bold animate-count-up">
+              <div className="text-3xl font-extrabold tracking-tight animate-count-up">
                 {stats?.parkedCount ?? 0}
-                <span className="text-sm font-normal text-muted-foreground">/{stats?.maxSlots ?? 0}</span>
+                <span className="text-base font-medium text-muted-foreground">/{stats?.maxSlots ?? 0}</span>
               </div>
-              <Progress value={stats ? (stats.parkedCount / stats.maxSlots) * 100 : 0} className="mt-2 h-1.5" />
-              <p className="text-[10px] text-muted-foreground mt-1">
+              <Progress value={stats ? (stats.parkedCount / stats.maxSlots) * 100 : 0} className="mt-2.5 h-1.5" />
+              <p className="text-[11px] text-muted-foreground mt-1.5 font-medium">
                 {(stats?.freeSlots ?? 0) === 0 ? 'Đã đầy!' : `${stats?.freeSlots ?? 0} vị trí trống`}
               </p>
             </CardContent>
           </Card>
 
           {/* Card 2: Sinh viên */}
-          <Card className="parking-card-hover stat-card-sky overflow-hidden animate-fade-up animate-fade-up-delay-2">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-muted-foreground">Sinh viên</span>
-                <GraduationCap className="h-4 w-4 text-sky-600" />
+          <Card className="parking-card-hover stat-card-sky stat-card-glass overflow-hidden rounded-xl border-0 animate-fade-up animate-fade-up-delay-2">
+            <CardContent className="p-4 pl-6">
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-xs font-semibold text-muted-foreground">Sinh viên</span>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-sky-100 dark:bg-sky-900/30">
+                  <GraduationCap className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                </div>
               </div>
-              <div className="text-2xl font-bold text-sky-700 dark:text-sky-400 animate-count-up">{stats?.studentCount ?? 0}</div>
-              <p className="text-[10px] text-muted-foreground mt-1">đang gửi xe</p>
+              <div className="text-3xl font-extrabold tracking-tight text-sky-700 dark:text-sky-400 animate-count-up">{stats?.studentCount ?? 0}</div>
+              <p className="text-[11px] text-muted-foreground mt-1.5 font-medium">đang gửi xe</p>
             </CardContent>
           </Card>
 
           {/* Card 3: Giảng viên */}
-          <Card className="parking-card-hover stat-card-amber overflow-hidden animate-fade-up animate-fade-up-delay-3">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-muted-foreground">Giảng viên</span>
-                <UserCheck className="h-4 w-4 text-amber-600" />
+          <Card className="parking-card-hover stat-card-amber stat-card-glass overflow-hidden rounded-xl border-0 animate-fade-up animate-fade-up-delay-3">
+            <CardContent className="p-4 pl-6">
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-xs font-semibold text-muted-foreground">Giảng viên</span>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                  <UserCheck className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                </div>
               </div>
-              <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 animate-count-up">{stats?.teacherCount ?? 0}</div>
-              <p className="text-[10px] text-muted-foreground mt-1">đang gửi xe</p>
+              <div className="text-3xl font-extrabold tracking-tight text-amber-700 dark:text-amber-400 animate-count-up">{stats?.teacherCount ?? 0}</div>
+              <p className="text-[11px] text-muted-foreground mt-1.5 font-medium">đang gửi xe</p>
             </CardContent>
           </Card>
 
           {/* Card 4: RFID quét gần nhất */}
-          <Card className="parking-card-hover overflow-hidden animate-fade-up animate-fade-up-delay-4">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-muted-foreground">RFID quét gần nhất</span>
-                <Radio className="h-4 w-4 text-cyan-500" />
+          <Card className="parking-card-hover stat-card-cyan stat-card-glass overflow-hidden rounded-xl border-0 animate-fade-up animate-fade-up-delay-4">
+            <CardContent className="p-4 pl-6">
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-xs font-semibold text-muted-foreground">RFID quét gần nhất</span>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-cyan-100 dark:bg-cyan-900/30">
+                  <Radio className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                </div>
               </div>
               <div className="flex items-center gap-1">
-                <p className="text-lg font-mono font-bold text-cyan-600 dark:text-cyan-400 truncate">{lastScannedUid || '—'}</p>
+                <p className="text-xl font-mono font-extrabold text-cyan-700 dark:text-cyan-400 truncate tracking-tight">{lastScannedUid || '—'}</p>
                 {lastScannedUid && (
                   <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => copyToClipboard(lastScannedUid)}>
                     <Copy className="h-3 w-3" />
                   </Button>
                 )}
               </div>
-              <p className="text-[10px] text-muted-foreground mt-1">lần quét cuối</p>
+              <p className="text-[11px] text-muted-foreground mt-1.5 font-medium">lần quét cuối</p>
             </CardContent>
           </Card>
 
           {/* Card 5: Thu nhập hôm nay */}
-          <Card className="parking-card-hover stat-card-violet overflow-hidden sm:col-span-2 md:col-span-1 animate-fade-up animate-fade-up-delay-4">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-muted-foreground">Thu nhập hôm nay</span>
-                <DollarSign className="h-4 w-4 text-violet-600" />
+          <Card className="parking-card-hover stat-card-violet stat-card-glass overflow-hidden rounded-xl border-0 sm:col-span-2 md:col-span-1 animate-fade-up animate-fade-up-delay-4">
+            <CardContent className="p-4 pl-6">
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-xs font-semibold text-muted-foreground">Thu nhập hôm nay</span>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-900/30">
+                  <DollarSign className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                </div>
               </div>
-              <div className="text-2xl font-bold text-violet-700 dark:text-violet-400 animate-count-up">
+              <div className="text-3xl font-extrabold tracking-tight text-violet-700 dark:text-violet-400 animate-count-up">
                 {stats ? formatVND(stats.todayRevenue) : '0đ'}
               </div>
-              <div className="flex items-center gap-3 mt-1">
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+              <div className="flex items-center gap-3 mt-1.5">
+                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
                   ↓ {stats?.todayEntries ?? 0} vào
                 </span>
-                <span className="text-[10px] text-red-500 dark:text-red-400 font-medium">
+                <span className="text-[11px] text-red-500 dark:text-red-400 font-semibold">
                   ↑ {stats?.todayExits ?? 0} ra
                 </span>
               </div>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{stats?.feePerTrip ?? 2000}đ/lượt</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">{stats?.feePerTrip ?? 2000}đ/lượt</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Tabs Section */}
+        {/* Tabs Section — modern pill-style */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="flex flex-wrap h-auto gap-1 p-1 bg-muted">
-            <TabsTrigger value="overview" className="gap-1.5 text-xs sm:text-sm">
-              <Eye className="h-3.5 w-3.5" />
+          <TabsList className="modern-tabs flex flex-wrap h-auto gap-1.5 p-2 rounded-xl">
+            <TabsTrigger value="overview" className="modern-tab-trigger gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-medium">
+              <Eye className="h-4 w-4" />
               <span className="hidden sm:inline">Tổng quan</span>
               <span className="sm:hidden">View</span>
             </TabsTrigger>
             {isAdmin && (
-              <TabsTrigger value="students" className="gap-1.5 text-xs sm:text-sm">
-                <GraduationCap className="h-3.5 w-3.5" />
+              <TabsTrigger value="students" className="modern-tab-trigger gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-medium">
+                <GraduationCap className="h-4 w-4" />
                 <span>Sinh viên</span>
               </TabsTrigger>
             )}
             {isAdmin && (
-              <TabsTrigger value="teachers" className="gap-1.5 text-xs sm:text-sm">
-                <UserCheck className="h-3.5 w-3.5" />
+              <TabsTrigger value="teachers" className="modern-tab-trigger gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-medium">
+                <UserCheck className="h-4 w-4" />
                 <span>Giảng viên</span>
               </TabsTrigger>
             )}
             {isAdmin && (
-              <TabsTrigger value="manage" className="gap-1.5 text-xs sm:text-sm">
-                <Users className="h-3.5 w-3.5" />
+              <TabsTrigger value="manage" className="modern-tab-trigger gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-medium">
+                <Users className="h-4 w-4" />
                 <span>Tài khoản</span>
               </TabsTrigger>
             )}
             {isAdmin && (
-            <TabsTrigger value="guests" className="gap-1.5 text-xs sm:text-sm">
-              <UserRound className="h-3.5 w-3.5" />
+            <TabsTrigger value="guests" className="modern-tab-trigger gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-medium">
+              <UserRound className="h-4 w-4" />
               <span>Khách</span>
             </TabsTrigger>
             )}
-            <TabsTrigger value="history" className="gap-1.5 text-xs sm:text-sm">
-              <History className="h-3.5 w-3.5" />
+            <TabsTrigger value="history" className="modern-tab-trigger gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-medium">
+              <History className="h-4 w-4" />
               <span>Lịch sử</span>
             </TabsTrigger>
-            <TabsTrigger value="reports" className="gap-1.5 text-xs sm:text-sm">
-              <BarChart3 className="h-3.5 w-3.5" />
+            <TabsTrigger value="reports" className="modern-tab-trigger gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-medium">
+              <BarChart3 className="h-4 w-4" />
               <span>Báo cáo</span>
             </TabsTrigger>
             {isAdmin && (
-              <TabsTrigger value="activity-logs" className="text-xs gap-1.5">
-                <Activity className="h-3.5 w-3.5" />Nhật ký
+              <TabsTrigger value="activity-logs" className="modern-tab-trigger gap-2 px-4 py-2 rounded-lg text-xs font-medium">
+                <Activity className="h-4 w-4" />Nhật ký
               </TabsTrigger>
             )}
             {isAdmin && (
-              <TabsTrigger value="settings" className="gap-1.5 text-xs sm:text-sm">
-                <Settings className="h-3.5 w-3.5" />
+              <TabsTrigger value="settings" className="modern-tab-trigger gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-medium">
+                <Settings className="h-4 w-4" />
                 <span>Cấu hình</span>
               </TabsTrigger>
             )}
