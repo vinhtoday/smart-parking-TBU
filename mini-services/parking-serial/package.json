@@ -1,0 +1,7 @@
+{
+  "name": "parking-serial",
+  "scripts": {
+    "dev": "bun --hot index.ts"
+  },
+  "dependencies": {}
+}
